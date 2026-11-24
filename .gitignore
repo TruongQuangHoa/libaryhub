@@ -30,10 +30,23 @@ bld/
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# Environment & local secrets
+# API keys, secrets & local configuration files
 .env
 .env.*
+!.env.example
+!Chatbot/.env.example
+Chatbot/.env
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+appsettings.*.local.json
+secrets.json
+*secret*.json
+*apikey*
+*api-key*
 *.local
+*.key
+*.pem
 
 # Python / Node if present
 __pycache__/
