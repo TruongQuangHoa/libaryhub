@@ -1,0 +1,172 @@
+@using LibraryHub.Models;
+@model IList<tblBook>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách sách</h2>
+        <p>
+            <section class="section dashboard">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card recent-sales overflow-auto">
+                            <div class="card-body mt-4">
+                                
+                                <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 mb-4">
+
+                                    <a asp-area="Admin" asp-controller="Book" asp-action="Import" class="btn btn-primary">
+                                        <i class="bi bi-file-earmark-arrow-up me-1"></i>
+                                        Nhập sách từ Excel
+                                    </a>
+
+                                    <a asp-area="Admin" asp-controller="Book" asp-action="DownloadExcelTemplate"
+                                       class="btn btn-success">
+                                        <i class="bi bi-file-earmark-excel me-1"></i>
+                                        Tải file Excel mẫu
+                                    </a>
+
+                                </div>
+
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">STT</th>
+                                            <th class="text-center">Ảnh sách</th>
+                                            <th class="text-center">Tiêu đề sách</th>
+                                            <th class="text-center">Nhà xuất bản</th>
+                                            <th class="text-center">Năm xuất bản</th>
+                                            <th class="text-center">Tác giả</th>
+                                            <th class="text-center">Số lượng</th>
+                                            <th class="text-center">Số lượng mượn</th>
+                                            <th class="text-center">SL độc giả đã đọc</th>
+                                            <th class="text-center">Mô tả</th>
+                                            <th class="text-center">Thể loại</th>
+                                            <th class="text-center">Hiển thị</th>
+                                            <th class="text-center">Chức năng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int stt = 0;
+                                        }
+
+                                        @foreach (var item in Model)
+                                        {
+                                            stt++;
+
+                                            <tr>
+                                                <td class="text-center">
+                                                    @stt
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @if (!string.IsNullOrEmpty(item.ImageBook))
+                                                    {
+                                                        <img src="@item.ImageBook" alt="@item.TitleBook" loading="lazy" style="
+                                                        width:60px;
+                                                        height:85px;
+                                                        object-fit:cover;
+                                                        border-radius:5px;
+                                                        border:1px solid #dee2e6;
+                                                        box-shadow:0 2px 5px rgba(0,0,0,.1);
+                                                        " />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div style="
+                                                            width:60px;
+                                                            height:85px;
+                                                            display:flex;
+                                                            align-items:center;
+                                                            justify-content:center;
+                                                            margin:auto;
+                                                            border:1px solid #ddd;
+                                                            border-radius:5px;
+                                                            background:#f8f9fa;
+                                                            color:#999;
+                                                            font-size:12px;
+                                                            text-align:center;">
+                                                            Chưa có<br />ảnh
+                                                        </div>
+                                                    }
+                                                </td>
+
+                                                <!-- TIÊU ĐỀ -->
+                                                <td class="text-primary text-center">@item.TitleBook</td>
+
+                                                <td class="text-center">
+                                                    @item.Publisher
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @item.PublicationYear
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @item.Author
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @item.BookQuantity
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @item.BorrowQuantity
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @item.TotalReaders
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @item.Description
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @item.category?.CategoryName
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <form asp-area="Admin" asp-controller="Book" asp-action="ToggleStatus"
+                                                          method="post">
+
+                                                        @Html.AntiForgeryToken()
+
+                                                        <input type="hidden" name="id" value="@item.BookID" />
+
+                                                        <div class="form-check form-switch d-flex justify-content-center">
+                                                            <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                                   name="IsActive" @(item.IsActive ? "checked" : "")
+                                                                   onchange="this.form.submit()" />
+                                                        </div>
+                                                    </form>
+                                                </td>
+
+                                                <td class="text-center">
+
+                                                    <a asp-area="Admin" asp-controller="Book" asp-action="Edit"
+                                                       asp-route-id="@item.BookID" class="btn btn-primary btn-sm"
+                                                       title="Chỉnh sửa sách">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+
+                                                    <a asp-area="Admin" asp-controller="Book" asp-action="Delete"
+                                                       asp-route-id="@item.BookID" class="btn btn-danger btn-sm"
+                                                       title="Xóa sách">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </p>
+    </div>
+</main>

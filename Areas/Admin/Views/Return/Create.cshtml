@@ -1,0 +1,130 @@
+@model LibraryHub.Models.tblReturn
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Thêm phiếu trả mới</h2>
+    </div>
+
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="form-row row">
+
+                @* 1. Chọn Phiếu Mượn Gốc *@
+                <div class="form-group col-md-6 mb-3">
+                    <label>Phiếu mượn (<span class="text-danger">*</span>)</label>
+                    @* Sử dụng ViewBag.borrowingList được LoadData() truyền vào *@
+                    <select asp-for="BorrowingID" class="form-control" asp-items="ViewBag.borrowingList" required>
+                        <option value="">--- Chọn phiếu mượn ---</option>
+                    </select>
+                    <span asp-validation-for="BorrowingID" class="text-danger"></span>
+                </div>
+
+                @* 2. Ngày trả *@
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ngày trả sách (<span class="text-danger">*</span>)</label>
+                    @* Đặt giá trị mặc định là ngày hiện tại *@
+                    <input type="datetime-local" class="form-control" asp-for="ReturnDate"
+                        value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                    <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                </div>
+
+                @* 3. Thủ thư *@
+                <div class="form-group col-md-6 mb-3">
+                    <label>Thủ thư nhận (<span class="text-danger">*</span>)</label>
+                    @* Sử dụng ViewBag.laList được LoadData() truyền vào *@
+                    <select asp-for="LibrarianID" class="form-control" asp-items="ViewBag.laList" required>
+                        <option value="">--- Chọn thủ thư ---</option>
+                    </select>
+                    <span asp-validation-for="LibrarianID" class="text-danger"></span>
+                </div>
+
+                @* 4. Các trường ẩn hoặc giá trị mặc định không cần nhập *@
+                @* TotalFine và IsActive sẽ được Controller tính toán và set *@
+                <input type="hidden" asp-for="TotalFine" value="0" />
+                <input type="hidden" asp-for="IsActive" value="true" />
+            </div>
+
+            <hr />
+
+            <a asp-controller="Return" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-success p-2">
+                <i class="bi bi-box-arrow-in-down"></i> Hoàn tất trả sách
+            </button>
+        </form>
+
+        @* Script để hiển thị cảnh báo nếu ngày trả lớn hơn ngày hiện tại (Optional) *@
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var returnDateInput = document.getElementById('ReturnDate');
+                if (returnDateInput) {
+                    returnDateInput.addEventListener('change', function () {
+                        var selectedDate = new Date(this.value);
+                        var now = new Date();
+                        // Đặt giây và mili giây về 0 để so sánh chính xác hơn
+                        now.setSeconds(0, 0);
+
+                        if (selectedDate > now) {
+                            alert('Cảnh báo: Ngày trả sách đang lớn hơn thời điểm hiện tại. Vui lòng kiểm tra lại.');
+                            // Nếu muốn chặn, có thể reset giá trị: this.value = '@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")';
+                        }
+                    });
+                }
+            });
+        </script>
+    </div>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var returnDateInput = document.querySelector('[asp-for="ReturnDate"]');
+        var borrowingSelect = document.querySelector('[asp-for="BorrowingID"]');
+        var form = document.querySelector('form');
+
+        // Hàm validate ngày trả so với ngày mượn
+        function validateReturnDate() {
+            var selectedBorrowingID = borrowingSelect.value;
+            if (!selectedBorrowingID || !returnDateInput.value) {
+                return true; // Chưa chọn → để required xử lý
+            }
+
+            // Lấy ngày mượn từ text của option được chọn
+            var selectedOption = borrowingSelect.options[borrowingSelect.selectedIndex];
+            var optionText = selectedOption.text;
+
+            // Trích xuất ngày mượn từ chuỗi dạng: "ID - Độc giả: ... - Ngày mượn: dd/MM/yyyy"
+            var borrowDateMatch = optionText.match(/Ngày mượn: (\d{2}\/\d{2}\/\d{4})/);
+            if (!borrowDateMatch) return true;
+
+            var borrowDateStr = borrowDateMatch[1]; // ví dụ: 15/12/2025
+            var borrowDate = new Date(borrowDateStr.split('/').reverse().join('-')); // chuyển sang YYYY-MM-DD
+
+            var returnDate = new Date(returnDateInput.value);
+
+            if (returnDate < borrowDate) {
+                returnDateInput.setCustomValidity(
+                    "Ngày trả sách không thể nhỏ hơn ngày mượn (" + borrowDateStr + ")."
+                );
+            } else {
+                returnDateInput.setCustomValidity(""); // Xóa lỗi
+            }
+        }
+
+        // Gọi validate khi thay đổi phiếu mượn hoặc ngày trả
+        borrowingSelect.addEventListener('change', validateReturnDate);
+        returnDateInput.addEventListener('change', validateReturnDate);
+
+        // Gọi trước khi submit để chắc chắn
+        form.addEventListener('submit', function () {
+            validateReturnDate();
+        });
+    });
+</script>

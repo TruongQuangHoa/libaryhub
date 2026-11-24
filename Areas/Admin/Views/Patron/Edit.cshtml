@@ -1,0 +1,146 @@
+@model LibraryHub.Models.tblPatron
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa độc giả</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="post" asp-action="Edit" enctype="multipart/form-data">
+            <div class="form-row">
+                <input type="text" class="form-control" asp-for="PatronID" type="hidden">
+                <input type="hidden" asp-for="UserID" />
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ảnh độc giả</label>
+
+                    <input type="file" class="form-control" name="photo" accept=".jpg,.jpeg,.png,.gif,.webp" />
+
+                    <small class="text-muted">
+                        Chọn ảnh mới nếu muốn thay ảnh hiện tại.
+                    </small>
+
+                    <span class="text-danger">
+                        @Html.ValidationMessage("Photo")
+                    </span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ảnh hiện tại</label>
+
+                    @if (!string.IsNullOrEmpty(Model.ImagePatron))
+                    {
+                        <div class="mt-2">
+                            <img id="currentPatronImage" src="@Model.ImagePatron" alt="Ảnh @Model.PatronName" style="
+                            width:120px;
+                            height:150px;
+                            object-fit:cover;
+                            border-radius:8px;
+                            border:1px solid #ddd;
+                            " />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mt-2">
+                            <img id="currentPatronImage" src="" alt="Ảnh xem trước" style="
+                            display:none;
+                            width:120px;
+                            height:150px;
+                            object-fit:cover;
+                            border-radius:8px;
+                            border:1px solid #ddd;
+                            " />
+
+                            <span id="noPatronImage" class="text-muted">
+                                Chưa có ảnh
+                            </span>
+                        </div>
+                    }
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tên độc giả</label>
+                    <input type="text" class="form-control" asp-for="PatronName" placeholder="Tên độc giả..." required>
+                    <span asp-validation-for="PatronName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Địa chỉ</label>
+                    <input type="text" class="form-control" asp-for="Address" placeholder="Địa chỉ..." required>
+                    <span asp-validation-for="Address" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Số điện thoại</label>
+                    <input type="text" class="form-control" asp-for="Phone" placeholder="Số điện thoại..." required>
+                    <span asp-validation-for="Phone" class="alert-danger"></span>
+                </div>
+
+                
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="Email">Email</label>
+
+                    <input type="email" class="form-control" asp-for="Email" placeholder="Nhập email..." required />
+
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ngày đăng ký</label>
+                    <input type="date" class="form-control" asp-for="RegisterDate" placeholder="Ngày đăng ký..."
+                           required>
+                    <span asp-validation-for="RegisterDate" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", Model.IsActive)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+            
+            <a asp-controller="Patron" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const photoInput = document.querySelector('input[name="photo"]');
+        const currentImage = document.getElementById("currentPatronImage");
+
+        if (!photoInput || !currentImage) {
+            return;
+        }
+
+        photoInput.addEventListener("change", function (event) {
+
+            const file = event.target.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            // Kiểm tra file ảnh
+            if (!file.type.startsWith("image/")) {
+                return;
+            }
+
+            const imageUrl = URL.createObjectURL(file);
+
+            currentImage.src = imageUrl;
+        });
+    });
+</script>

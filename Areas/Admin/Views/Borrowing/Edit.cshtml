@@ -1,0 +1,53 @@
+@model LibraryHub.Models.tblBorrowing
+Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa thông tin phiếu mượn</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Edit">
+            <div class="form-row row">
+                <input type="text" class="form-contro" asp-for="BorrowingID" type="hidden">
+                <div class="form-group col-md-6 mb-3">
+                    <label>Độc giả</label>
+                    <input type="text" class="form-control" value="@(Model.patron?.PatronName ?? "Không xác định")"
+                        readonly />
+                    <input type="hidden" asp-for="PatronID" />
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ngày mượn</label>
+                    <input type="text" class="form-control" value="@Model.BorrowDate?.ToString("dd/MM/yyyy HH:mm")"
+                        readonly />
+                    <!-- Quan trọng: Vẫn giữ hidden field để Entity Framework bind được giá trị cũ -->
+                    <input type="hidden" asp-for="BorrowDate" />
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Hạn trả</label>
+                    <input type="datetime-local" class="form-control" asp-for="DueDate" placeholder="Hạn trả" required>
+                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Thủ thư tạo</label>
+                    <select asp-for="LibrarianID" class="form-control" asp-items="ViewBag.laList" required>
+                        <option value="">--- Chọn thủ thư ---</option>
+                    </select>
+                </div>
+                <input type="hidden" asp-for="CreateDate" />
+                <input type="hidden" asp-for="UpdateDate" />
+                <input type="hidden" asp-for="IsActive" />
+            </div>
+            <a asp-controller="Borrowing" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>

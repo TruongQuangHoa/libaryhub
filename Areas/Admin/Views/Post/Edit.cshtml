@@ -1,0 +1,51 @@
+
+@using LibraryHub.ViewModels
+@model PostManagementViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa bài viết";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+<div class="pagetitle">
+    <h1>Chỉnh sửa bài viết</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">Quản trị</li>
+            <li class="breadcrumb-item">
+                <a asp-action="Index">Quản lý bài viết</a>
+            </li>
+            <li class="breadcrumb-item active">Chỉnh sửa</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <form id="postForm"
+          asp-area="Admin"
+          asp-controller="Post"
+          asp-action="Edit"
+          method="post"
+          enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="PostID" />
+
+        <partial name="_PostForm" model="Model" />
+
+        <div class="d-flex justify-content-end gap-2 mb-4">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i>
+                Cập nhật bài viết
+            </button>
+        </div>
+    </form>
+</section>
+</main>

@@ -1,0 +1,82 @@
+@model LibraryHub.Models.tblMenu
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa menu</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Edit">
+            <div class="form-row">
+                <input type="text" class="form-contro" asp-for="MenuID" type="hidden">
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tên Menu</label>
+                    <input type="text" class="form-control" asp-for="MenuName" placeholder="Tên menu..." required>
+                    <span asp-validation-for="MenuName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tên bộ điều khiển</label>
+                    <input type="text" class="form-control" asp-for="ControllerName" placeholder="Tên bộ điều khiển...">
+                    <span asp-validation-for="ControllerName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tên hoạt động</label>
+                    <input type="text" class="form-control" asp-for="ActionName" placeholder="Tên hoạt động...">
+                    <span asp-validation-for="ActionName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Cấp bậc</label>
+                    <select asp-for="Levels" class="form-select" id="Levels">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mã cha</label>
+                    <select asp-for="ParentID" class="form-control"
+                        asp-items="@(new SelectList(ViewBag.mnList, "Value", "Text"))">
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Thứ tự menu</label>
+                    <input type="number" min="0" class="form-control" asp-for="MenuOrder" placeholder="Nhập thứ tự menu..." required>
+                    <span asp-validation-for="MenuOrder" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Vị trí</label>
+                    <input type="number" min="1" class="form-control" asp-for="Position" placeholder="Nhập vị trí..." required>
+                    <span asp-validation-for="Position" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Link</label>
+                    <input type="text" class="form-control" asp-for="Link" placeholder="Nhập đường dẫn...">
+                    <span asp-validation-for="Link" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", Model.IsActive)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+            
+            <a asp-controller="Menu" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>

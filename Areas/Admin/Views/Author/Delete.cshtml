@@ -1,0 +1,144 @@
+
+@model LibraryHub.Models.tblAuthor
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Xóa tác giả";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Xóa tác giả</h2>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Author" asp-action="Index">Tác giả</a>
+                </li>
+                <li class="breadcrumb-item active">Xóa tác giả</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container shadow p-5">
+
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            Bạn có chắc chắn muốn xóa tác giả này không?
+            Thao tác này không thể hoàn tác.
+        </div>
+
+        <div class="row align-items-start">
+
+            <!-- Ảnh tác giả -->
+            <div class="col-md-3 mb-3 text-center">
+                @if (!string.IsNullOrWhiteSpace(Model.ImageAuthor))
+                {
+                    <img src="@Model.ImageAuthor"
+                         alt="Ảnh @Model.FullName"
+                         style="width:150px;height:180px;object-fit:cover;border-radius:8px;border:1px solid #ddd;" />
+                }
+                else
+                {
+                    <div class="text-muted border rounded p-4">
+                        Chưa có ảnh
+                    </div>
+                }
+            </div>
+
+            <!-- Thông tin tác giả -->
+            <div class="col-md-9">
+                <dl class="row">
+
+                    <dt class="col-sm-4">Mã tác giả:</dt>
+                    <dd class="col-sm-8">@Model.AuthorID</dd>
+
+                    <dt class="col-sm-4">Họ và tên:</dt>
+                    <dd class="col-sm-8">@Model.FullName</dd>
+
+                    <dt class="col-sm-4">Nhà xuất bản:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Publisher != null)
+                        {
+                            <span class="badge bg-info text-dark">
+                                @Model.Publisher.PublisherName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa xác định</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Ngày sinh:</dt>
+                    <dd class="col-sm-8">
+                        @(Model.DateOfBirth.HasValue
+                            ? Model.DateOfBirth.Value.ToString("dd/MM/yyyy")
+                            : "—")
+                    </dd>
+
+                    <dt class="col-sm-4">Giới tính:</dt>
+                    <dd class="col-sm-8">
+                        @(string.IsNullOrWhiteSpace(Model.Gender) ? "—" : Model.Gender)
+                    </dd>
+
+                    <dt class="col-sm-4">Quốc tịch:</dt>
+                    <dd class="col-sm-8">
+                        @(string.IsNullOrWhiteSpace(Model.Nationality) ? "—" : Model.Nationality)
+                    </dd>
+
+                    <dt class="col-sm-4">Chuyên môn:</dt>
+                    <dd class="col-sm-8">
+                        @(string.IsNullOrWhiteSpace(Model.Specialization) ? "—" : Model.Specialization)
+                    </dd>
+
+                    <dt class="col-sm-4">Số đầu sách:</dt>
+                    <dd class="col-sm-8">@Model.BookCount</dd>
+
+                    <dt class="col-sm-4">Lượt độc giả:</dt>
+                    <dd class="col-sm-8">@Model.TotalReaders.ToString("N0")</dd>
+
+                    <dt class="col-sm-4">Trạng thái:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Đang hiển thị</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Ngừng hiển thị</span>
+                        }
+                    </dd>
+
+                </dl>
+            </div>
+        </div>
+
+        <form asp-area="Admin"
+              asp-controller="Author"
+              asp-action="Delete"
+              method="post"
+              onsubmit="return confirm('Bạn có chắc chắn muốn xóa tác giả này không?');">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="id" value="@Model.AuthorID" />
+
+            <a asp-area="Admin"
+               asp-controller="Author"
+               asp-action="Index"
+               class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-danger p-2">
+                <i class="bi bi-trash"></i>
+                Xác nhận xóa
+            </button>
+        </form>
+
+    </div>
+</main>

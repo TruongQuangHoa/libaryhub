@@ -1,0 +1,63 @@
+@using System.Collections.Generic
+@using LibraryHub.Models;
+@model List<tblRoles>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách vai trò</h2>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body mt-4">
+                        <table class="table table-hover table-bordered datatable" style="background-color: white;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-2 text-center">Tên vai trò</th>
+                                    <th class="col-1 text-center">Chức năng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int stt = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    stt++;
+                                    <tr>
+                                        <td class="text-center" scope="row">@stt</td>
+                                        <td class="text-center">@item.RoleName</td>
+                                        <td class="text-center">
+
+                                            <a asp-area="Admin" asp-controller="Roles" asp-action="Edit"
+                                               asp-route-id="@item.RoleID"
+                                               class="btn btn-primary btn-sm @(item.RoleName == "Admin" ? "disabled" : "")"
+                                               style="@(item.RoleName == "Admin" ? "pointer-events:none;opacity:0.5;" : "")">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <a asp-area="Admin" asp-controller="Roles" asp-action="Delete"
+                                               asp-route-id="@item.RoleID"
+                                               class="btn btn-danger btn-sm @(item.RoleName == "Admin" ? "disabled" : "")"
+                                               style="@(item.RoleName == "Admin" ? "pointer-events:none;opacity:0.5;" : "")">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

@@ -1,0 +1,203 @@
+@model LibraryHub.Models.tblAuthor
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Sửa thông tin tác giả";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa thông tin tác giả</h2>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Author" asp-action="Index">Tác giả</a>
+                </li>
+                <li class="breadcrumb-item active">Sửa thông tin tác giả</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container shadow p-5">
+        <form method="post" asp-area="Admin" asp-controller="Author" asp-action="Edit" enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+
+            <input asp-for="AuthorID" type="hidden" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row">
+
+                <!-- Ảnh tác giả -->
+                <div class="form-group col-md-6 mb-3">
+                    <label class="control-label">Ảnh tác giả</label>
+
+                    <div class="mb-3">
+                        <img id="imagePreview" src="@Model.ImageAuthor" alt="Ảnh @Model.FullName"
+                             style="width:150px;height:180px;object-fit:cover;border-radius:8px;border:1px solid #ddd;display:@(string.IsNullOrEmpty(Model.ImageAuthor) ? "none" : "block");" />
+
+                        <span id="noImageText" class="text-muted"
+                              style="display:@(string.IsNullOrEmpty(Model.ImageAuthor) ? "block" : "none");">
+                            Chưa có ảnh
+                        </span>
+                    </div>
+
+                    <input type="file" id="imageFile" name="imageFile" class="form-control"
+                           accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+
+                    <small class="text-muted">
+                        Nếu không chọn ảnh mới, hệ thống sẽ giữ nguyên ảnh hiện tại.
+                        Dung lượng tối đa 5MB.
+                    </small>
+
+                    <span asp-validation-for="ImageAuthor" class="text-danger"></span>
+                </div>
+
+                <!-- Họ tên -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="FullName">Họ và tên tác giả</label>
+                    <input asp-for="FullName" class="form-control" placeholder="Nhập họ và tên tác giả..." />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                <!-- Nhà xuất bản -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="PublisherID" class="form-label">
+                        Nhà xuất bản <span class="text-danger">*</span>
+                    </label>
+
+                    <select asp-for="PublisherID" asp-items="ViewBag.PublisherList" class="form-select">
+                        <option value="">--- Vui lòng chọn nhà xuất bản ---</option>
+                    </select>
+
+                    <span asp-validation-for="PublisherID" class="text-danger"></span>
+                </div>
+
+                <!-- Ngày sinh -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="DateOfBirth">Ngày sinh</label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" />
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
+
+                <!-- Giới tính -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="Gender">Giới tính</label>
+                    <select asp-for="Gender" class="form-select">
+                        <option value="">--- Chọn giới tính ---</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+
+                <!-- Quốc tịch -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="Nationality">Quốc tịch</label>
+                    <input asp-for="Nationality" class="form-control" placeholder="Ví dụ: Việt Nam" />
+                    <span asp-validation-for="Nationality" class="text-danger"></span>
+                </div>
+
+                <!-- Chuyên môn -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="Specialization">Lĩnh vực / chuyên môn</label>
+                    <input asp-for="Specialization" class="form-control" placeholder="Nhập lĩnh vực sáng tác..." />
+                    <span asp-validation-for="Specialization" class="text-danger"></span>
+                </div>
+
+                <!-- Tiểu sử -->
+                <div class="form-group col-12 mb-3">
+                    <label asp-for="Biography">Tiểu sử tác giả</label>
+                    <textarea asp-for="Biography" class="form-control" rows="5"
+                              placeholder="Giới thiệu thông tin và quá trình hoạt động của tác giả..."></textarea>
+                    <span asp-validation-for="Biography" class="text-danger"></span>
+                </div>
+
+                <!-- Số đầu sách -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="BookCount">Số đầu sách hiển thị</label>
+                    <input asp-for="BookCount" type="number" min="0" class="form-control"
+                           placeholder="Nhập số đầu sách..." />
+                    <span asp-validation-for="BookCount" class="text-danger"></span>
+                </div>
+
+                <!-- Tổng lượt độc giả -->
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="TotalReaders">Tổng lượt độc giả hiển thị</label>
+                    <input asp-for="TotalReaders" type="number" min="0" class="form-control"
+                           placeholder="Nhập tổng lượt độc giả..." />
+                    <span asp-validation-for="TotalReaders" class="text-danger"></span>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="form-group col-md-6 mb-3">
+                    <label>Trạng thái hiển thị</label>
+
+                    <div class="form-check form-switch mt-2">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label">
+                            Hiển thị
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <a asp-area="Admin" asp-controller="Author" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-save"></i>
+                Lưu thông tin
+            </button>
+
+        </form>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const imageFile = document.getElementById('imageFile');
+            const imagePreview = document.getElementById('imagePreview');
+            const noImageText = document.getElementById('noImageText');
+
+            imageFile.addEventListener('change', function () {
+                const file = this.files && this.files[0];
+
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn một tệp hình ảnh hợp lệ.');
+                    this.value = '';
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Dung lượng ảnh không được vượt quá 5MB.');
+                    this.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    noImageText.style.display = 'none';
+                };
+
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
+}

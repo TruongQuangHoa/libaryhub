@@ -1,0 +1,41 @@
+@model LibraryHub.Models.tblUsersRoles
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Chỉnh sửa vai trò người dùng</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Edit">
+            <input type="hidden" asp-for="UserID" />
+            <input type="hidden" name="oldRoleID" value="@Model.RoleID" />
+
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-3">
+                    <label>Tên người dùng</label>
+                    <input type="text" class="form-control" value="@ViewBag.UserName" readonly />
+                </div>
+
+                <div class="form-group col-md-12 mb-3">
+                    <label asp-for="RoleID">Chọn vai trò mới</label>
+                    <select asp-for="RoleID" class="form-control" asp-items="ViewBag.listRole">
+                        <option value="">-- Chọn vai trò --</option>
+                    </select>
+                    <span asp-validation-for="RoleID" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a asp-controller="UserRole" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                    <i class="bi bi-arrow-left-circle"></i> Quay lại
+                </a>
+
+                <button type="submit" class="btn btn-lg btn-primary p-2">
+                    <i class="bi bi-save-fill"></i> Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</main>

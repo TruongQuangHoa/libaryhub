@@ -1,0 +1,98 @@
+@using LibraryHub.Models;
+@using LibraryHub.Utilities;
+@model IList<viewBook>
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <div class="mb-2">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
+        <div class="col-lg-3">
+            <div class="card shadow-sm p-3 mb-4">
+                <h5 class="fw-bold mb-3">Lọc sách</h5>
+                <hr>
+                <h6>Danh mục</h6>
+                <div class="list-group list-group-flush">
+                    <a href="/Books" class="list-group-item list-group-item-action border-0 ps-0">Tất cả danh mục</a>
+                    @foreach (var cat in ViewBag.Categories)
+                    {
+                        <a href="/Books?categoryId=@cat.CategoryID"
+                            class="list-group-item list-group-item-action border-0 ps-0 @(ViewContext.HttpContext.Request.Query["categoryId"] == cat.CategoryID.ToString() ? "text-primary fw-bold" : "")">
+                            @cat.CategoryName
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>@(ViewBag.CurrentCategoryName ?? "Tất cả sách")</h4>
+                <div class="dropdown">
+                    <select class="form-select form-select-sm">
+                        <option>Mới nhất</option>
+                        <option>Phổ biến nhất</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                @foreach (var book in Model)
+                {
+                    string url = Functions.TitleSlugGeneration("book", book.TitleBook, book.BookID);
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-primary">Sách mới</span>
+                            </div>
+
+                            <img src="@(string.IsNullOrEmpty(book.ImageBook) ? "/images/default-book.png" : book.ImageBook)"
+                                class="card-img-top p-2" alt="@book.TitleBook" style="height: 200px; object-fit: contain;">
+
+                            <div class="card-body">
+                                <div class="d-flex gap-1 mb-2">
+                                    <span
+                                        class="badge bg-light text-primary border border-primary">@book.CategoryName</span>
+                                </div>
+                                <h6 class="card-title fw-bold text-truncate">@book.TitleBook</h6>
+                                <p class="card-text text-muted small text-truncate-2" style="height: 40px;">
+                                    @book.Description</p>
+
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-person-circle text-info"></i>
+                                    <span class="small">@book.Author</span>
+                                </div>
+                            </div>
+
+                            <div class="card-footer bg-white border-0 pb-3">
+                                <div class="d-flex gap-2">
+                                    <a href="/@url" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                                        Xem chi tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card {
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>

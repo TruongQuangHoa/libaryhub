@@ -1,0 +1,148 @@
+@using LibraryHub.Models;
+@model IList<tblBorrowing>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách phiếu mượn</h2>
+
+        <p>
+            <section class="section dashboard">
+                <div class="row">
+
+                    <div class="col-12">
+
+                        <div class="card recent-sales overflow-auto">
+                            <div class="card-body mt-4">
+                                
+
+                                @* Thanh tìm kiếm phiếu mượn gọn gàng *@
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                    <form asp-action="Index" method="get" class="d-flex align-items-center gap-2" style="max-width: 440px; width: 100%;">
+                                        <div class="input-group input-group-sm shadow-sm rounded-pill overflow-hidden border">
+                                            <span class="input-group-text bg-white border-0 ps-3 text-muted">
+                                                <i class="bi bi-search"></i>
+                                            </span>
+                                            <input type="text" name="search" value="@ViewBag.Search"
+                                                   class="form-control border-0 shadow-none py-2"
+                                                   placeholder="Tìm theo tên hoặc email độc giả..." />
+                                            @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                            {
+                                                <a asp-action="Index" class="btn bg-white border-0 text-secondary px-2 d-flex align-items-center" title="Xóa tìm kiếm">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </a>
+                                            }
+                                            <button type="submit" class="btn btn-primary border-0 px-3 fw-semibold">
+                                                Tìm kiếm
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                    {
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-light text-dark border fw-normal py-2 px-3">
+                                                Kết quả cho: <strong>@ViewBag.Search</strong>
+                                            </span>
+                                            <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                                <i class="bi bi-x-circle me-1"></i>Xóa lọc
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-1 text-center">STT</th>
+                                            <th class="col-1 text-center">Mã phiếu mượn</th>
+                                            <th class="col-1 text-center">Độc giả</th>
+                                            <th class="col-1 text-center">Ngày mượn</th>
+                                            <th class="col-1 text-center">Hạn trả</th>
+                                            <th class="col-1 text-center">Phí phiếu mượn</th>
+                                            <th class="col-1 text-center">Thủ thư tạo</th>
+                                            <th class="col-1 text-center">Ngày tạo</th>
+                                            <th class="col-1 text-center">Ngày cập nhật</th>
+                                            <th class="col-1 text-center">Trạng thái phiếu</th>
+                                            <th class="col-1 text-center">Chức năng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int stt = 0;
+                                        }
+                                        @foreach (var item in Model)
+                                        {
+                                            stt++;
+                                            <tr>
+                                                <td class="text-center">@stt</td>
+                                                <td class="text-center">@item.BorrowingID</td>
+                                                <td class="text-primary text-center" scope="row">@item.patron?.PatronName</td>
+                                                <td class="text-center" scope="row">@item.BorrowDate?.ToString("dd/MM/yyyy                                            HH:mm")</td>
+                                                <td class="text-center" scope="row">@item.DueDate?.ToString("dd/MM/yyyy HH:mm")
+                                                </td>
+                                                <td class="text-center" scope="row">
+                                                    <span class="badge bg-warning">@item.TotalBorrowingFee.ToString("N0")
+                                                        VNĐ</span>
+                                                    </td>
+                                                    <td class="text-center" scope="row">@item.librarian?.FullName</td>
+                                                    <td class="text-center" scope="row">@item.CreateDate?.ToString("dd/MM/yyyy                                    HH:mm")</td>
+                                                    <td class="text-center" scope="row">@(item.UpdateDate?.ToString("dd/MM/yyyy                               HH:mm") ?? "-")</td>
+                                                    <td class="text-center" scope="row">
+                                                        <span
+                                                            class="badge @(item.BorrowingStatusDisplay == "Quá hạn" ? "bg-danger" :
+                                                                                                                                                                                                                                                                                                                                                                                                              item.BorrowingStatusDisplay == "Đã trả" ? "bg-success" : "bg-primary")">
+                                                            @item.BorrowingStatusDisplay
+                                                        </span>
+                                                    </td>
+
+                                                    <td class="text-center text-nowrap">
+                                                        <a asp-action="Details" asp-route-id="@item.BorrowingID"
+                                                           class="btn btn-info btn-sm text-white me-1" title="Xem chi tiết phiếu mượn">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        @if (item.IsActive)
+                                                        {
+                                                            <a asp-action="Edit" asp-route-id="@item.BorrowingID"
+                                                               class="btn btn-primary btn-sm" title="Chỉnh sửa phiếu mượn">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button class="btn btn-secondary btn-sm" disabled
+                                                                    title="Phiếu đã trả, không thể sửa">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                        }
+
+                                                        <!-- Sửa lại đoạn nút Xóa ở đây -->
+                                                        @if (item.IsActive)
+                                                        {
+                                                            <a asp-action="Delete" asp-route-id="@item.BorrowingID"
+                                                               class="btn btn-danger btn-sm ms-1" title="Xóa phiếu mượn"
+                                                               onclick="return confirm('Bạn có chắc muốn xóa phiếu mượn này?')">
+                                                                <i class="bi bi-trash"></i>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button class="btn btn-secondary btn-sm ms-1" disabled
+                                                                    title="Phiếu đã trả, không thể xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </p>
+        </div>
+    </main>

@@ -1,0 +1,570 @@
+
+@using LibraryHub.Models
+@model IList<tblAuthor>
+
+<section id="featured-instructors" class="featured-instructors section author-featured">
+
+    <!-- Section Title -->
+    <div class="container section-title" data-aos="fade-up">
+        <h2>Tác giả nổi bật</h2>
+        <p>
+            Khám phá những cây bút tiêu biểu, những tác phẩm giá trị
+            và hành trình lan tỏa tri thức đến cộng đồng độc giả.
+        </p>
+    </div>
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row gy-4">
+
+            @if (Model != null && Model.Any())
+            {
+                var delay = 100;
+
+                foreach (var item in Model)
+                {
+                    double rating = item.Rating.HasValue
+                        ? Math.Clamp((double)item.Rating.Value, 0, 5)
+                        : 0;
+
+                    string description = string.IsNullOrWhiteSpace(item.Biography)
+                        ? "Thông tin giới thiệu về tác giả đang được cập nhật."
+                        : item.Biography.Trim();
+
+                    if (description.Length > 115)
+                    {
+                        description = description.Substring(0, 115) + "...";
+                    }
+
+                    <div class="col-xl-3 col-lg-4 col-md-6"
+                         data-aos="fade-up"
+                         data-aos-delay="@delay">
+
+                        <div class="author-card">
+
+                            <!-- Author Image -->
+                            <div class="author-image">
+
+                                @if (!string.IsNullOrWhiteSpace(item.ImageAuthor))
+                                {
+                                    <img src="@item.ImageAuthor"
+                                         alt="@item.FullName"
+                                         loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="author-no-image">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                }
+
+                                <div class="author-image-overlay"></div>
+
+                                <div class="author-rating">
+
+                                    @if (item.Rating.HasValue)
+                                    {
+                                        <div class="author-stars">
+                                            @for (int star = 1; star <= 5; star++)
+                                            {
+                                                if (rating >= star)
+                                                {
+                                                    <i class="bi bi-star-fill"></i>
+                                                }
+                                                else if (rating >= star - 0.5)
+                                                {
+                                                    <i class="bi bi-star-half"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star"></i>
+                                                }
+                                            }
+                                        </div>
+
+                                        <span>@rating.ToString("0.0")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="author-not-rated">
+                                            <i class="bi bi-star"></i>
+                                            Chưa đánh giá
+                                        </span>
+                                    }
+
+                                </div>
+
+                                <div class="author-book-badge">
+                                    <i class="bi bi-book-half"></i>
+                                    @item.BookCount đầu sách
+                                </div>
+
+                            </div>
+
+                            <!-- Author Content -->
+                            <div class="author-content">
+
+                                <div class="author-heading">
+                                    <h3>@item.FullName</h3>
+
+                                    <p class="author-specialty">
+                                        <i class="bi bi-pen"></i>
+
+                                        @(string.IsNullOrWhiteSpace(item.Specialization)
+                                            ? "Tác giả"
+                                            : item.Specialization)
+                                    </p>
+                                </div>
+
+                                <p class="author-description">
+                                    @description
+                                </p>
+
+                                <!-- Statistics -->
+                                <div class="author-stats">
+
+                                    <div class="author-stat-item">
+                                        <div class="author-stat-icon">
+                                            <i class="bi bi-people"></i>
+                                        </div>
+
+                                        <div class="author-stat-info">
+                                            <span class="author-stat-number">
+                                                @item.TotalReaders.ToString("N0")
+                                            </span>
+
+                                            <span class="author-stat-label">
+                                                Lượt độc giả
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="author-stat-divider"></div>
+
+                                    <div class="author-stat-item">
+                                        <div class="author-stat-icon">
+                                            <i class="bi bi-journals"></i>
+                                        </div>
+
+                                        <div class="author-stat-info">
+                                            <span class="author-stat-number">
+                                                @item.BookCount.ToString("N0")
+                                            </span>
+
+                                            <span class="author-stat-label">
+                                                Đầu sách
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Action -->
+                                <div class="author-actions">
+                                    <a href="#featured-courses" class="author-view-btn">
+                                        Khám phá sách
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    delay += 50;
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="author-empty">
+                        <i class="bi bi-journal-bookmark"></i>
+                        <h4>Chưa có tác giả nổi bật</h4>
+                        <p>Thông tin tác giả sẽ được cập nhật trong thời gian tới.</p>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</section>
+
+<style>
+    /* ========================================
+       AUTHOR FEATURED SECTION
+    ======================================== */
+
+    .author-featured {
+        padding: 70px 0;
+        background: #f8faff;
+    }
+
+    .author-featured .section-title {
+        padding-bottom: 45px;
+    }
+
+    .author-section-subtitle {
+        display: inline-block;
+        margin-bottom: 12px;
+        color: #1769d2;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    .author-featured .section-title h2 {
+        color: #203b5c;
+        font-size: 34px;
+        font-weight: 750;
+        margin-bottom: 12px;
+    }
+
+    .author-featured .section-title p {
+        max-width: 650px;
+        margin: 0 auto;
+        color: #738196;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    /* ========================================
+       AUTHOR CARD
+    ======================================== */
+
+    .author-card {
+        height: 100%;
+        background: #fff;
+        border: 1px solid #e9eef5;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 5px 22px rgba(30, 60, 100, 0.06);
+        transition: all 0.35s ease;
+    }
+
+    .author-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 35px rgba(30, 75, 130, 0.13);
+        border-color: #d7e6fa;
+    }
+
+    /* ========================================
+       AUTHOR IMAGE
+    ======================================== */
+
+    .author-image {
+        height: 245px;
+        position: relative;
+        overflow: hidden;
+        background: #edf3fa;
+    }
+
+    .author-image > img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.6s ease;
+    }
+
+    .author-card:hover .author-image > img {
+        transform: scale(1.07);
+    }
+
+    .author-no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #aabbd0;
+        font-size: 85px;
+    }
+
+    .author-image-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            transparent 45%,
+            rgba(14, 35, 62, 0.65) 100%
+        );
+        pointer-events: none;
+    }
+
+    /* ========================================
+       RATING
+    ======================================== */
+
+    .author-rating {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 11px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #233d5c;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .author-stars {
+        display: flex;
+        gap: 2px;
+        color: #f5a623;
+        font-size: 11px;
+    }
+
+    .author-not-rated {
+        color: #7b899b;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* ========================================
+       BOOK BADGE
+    ======================================== */
+
+    .author-book-badge {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 13px;
+        color: #fff;
+        background: #1769d2;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    /* ========================================
+       AUTHOR CONTENT
+    ======================================== */
+
+    .author-content {
+        padding: 22px 20px 20px;
+    }
+
+    .author-heading {
+        min-height: 67px;
+    }
+
+    .author-heading h3 {
+        margin: 0 0 8px;
+        color: #203b5c;
+        font-size: 19px;
+        font-weight: 750;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .author-specialty {
+        margin: 0;
+        color: #1769d2;
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+    }
+
+    .author-specialty i {
+        margin-right: 4px;
+    }
+
+    .author-description {
+        height: 62px;
+        margin: 12px 0 17px;
+        color: #78869a;
+        font-size: 13px;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* ========================================
+       AUTHOR STATISTICS
+    ======================================== */
+
+    .author-stats {
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 12px 8px;
+        background: #f2f6fc;
+        border-radius: 11px;
+    }
+
+    .author-stat-item {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .author-stat-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+        border-radius: 9px;
+        background: #e1edfc;
+        color: #1769d2;
+        font-size: 16px;
+    }
+
+    .author-stat-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .author-stat-number {
+        color: #203b5c;
+        font-size: 15px;
+        font-weight: 750;
+    }
+
+    .author-stat-label {
+        color: #8996a8;
+        font-size: 10px;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    .author-stat-divider {
+        width: 1px;
+        height: 35px;
+        background: #dce5f0;
+        margin: 0 5px;
+    }
+
+    /* ========================================
+       ACTION BUTTON
+    ======================================== */
+
+    .author-actions {
+        margin-top: 18px;
+    }
+
+    .author-view-btn {
+        width: 100%;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 10px 15px;
+        border-radius: 8px;
+        background: #1769d2;
+        color: #fff !important;
+        text-decoration: none !important;
+        font-size: 13px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .author-view-btn:hover {
+        background: #1055ae;
+        color: #fff !important;
+    }
+
+    .author-view-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .author-view-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* ========================================
+       EMPTY STATE
+    ======================================== */
+
+    .author-empty {
+        padding: 55px 20px;
+        text-align: center;
+        background: #fff;
+        border: 1px dashed #d7e2f0;
+        border-radius: 14px;
+    }
+
+    .author-empty > i {
+        color: #9db4d0;
+        font-size: 50px;
+    }
+
+    .author-empty h4 {
+        margin-top: 15px;
+        color: #203b5c;
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+    .author-empty p {
+        margin-bottom: 0;
+        color: #8290a3;
+        font-size: 14px;
+    }
+
+    /* ========================================
+       RESPONSIVE
+    ======================================== */
+
+    @@media (max-width: 767px) {
+        .author-featured {
+            padding: 45px 0;
+        }
+
+        .author-featured .section-title h2 {
+            font-size: 27px;
+        }
+
+        .author-image {
+            height: 260px;
+        }
+
+        .author-content {
+            padding: 20px;
+        }
+    }
+
+    @@media (max-width: 400px) {
+        .author-stat-item {
+            gap: 6px;
+        }
+
+        .author-stat-icon {
+            width: 29px;
+            height: 29px;
+            font-size: 14px;
+        }
+
+        .author-stat-number {
+            font-size: 13px;
+        }
+
+        .author-stat-label {
+            font-size: 9px;
+        }
+    }
+</style>

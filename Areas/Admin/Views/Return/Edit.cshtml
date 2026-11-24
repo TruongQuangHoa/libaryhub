@@ -1,0 +1,184 @@
+@model LibraryHub.Models.tblReturn
+@{
+    // Thiết lập Layout chung cho khu vực Admin
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+
+    // Lấy thông tin độc giả từ Phiếu mượn gốc
+    string patronInfo = Model.borrowing != null ?
+    $"Độc giả: {Model.borrowing.patron?.PatronName ?? "N/A"}" : "Không tìm thấy thông tin Phiếu mượn gốc";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Sửa thông tin phiếu trả</h1>
+    </div>
+    <div class="container shadow p-5">
+        <form method="post" asp-action="Edit">
+            <div class="form-row row">
+                <input type="hidden" asp-for="ReturnID" />
+                <input type="hidden" asp-for="BorrowingID" />
+                <input type="hidden" asp-for="IsActive" />
+                <div class="form-group col-md-6 mb-3">
+                    <label><strong>Phiếu mượn</strong></label>
+                    <input type="text" class="form-control" value="@patronInfo" readonly />
+                    <small class="form-text text-muted">ID Phiếu mượn: @Model.BorrowingID | Hạn trả:
+                        @(Model.borrowing?.DueDate?.ToString("dd/MM/yyyy") ?? "N/A")</small>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="ReturnDate">Ngày trả</label>
+                    @{
+                        // Định dạng lại DateTime? thành chuỗi date để input type="date" hoạt động
+                        string returnDateStr = Model.ReturnDate.HasValue ? Model.ReturnDate.Value.ToString("yyyy-MM-dd") :
+                        string.Empty;
+                    }
+                    <input type="datetime-local" class="form-control" asp-for="ReturnDate" required/>
+                    <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="LibrarianID">Thủ thư</label>
+                    <select asp-for="LibrarianID" class="form-control" asp-items="ViewBag.laList" required>
+                        <option value="">--- Chọn thủ thư ---</option>
+                    </select>
+                    <span asp-validation-for="LibrarianID" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-12 mb-4">
+                    <label asp-for="TotalFine">Tổng phí phạt hiện tại</label>
+                    <div class="d-flex gap-2 align-items-center">
+                        <input type="text" class="form-control text-danger font-weight-bold"
+                            value="@(Model.TotalFine.ToString("N0")) VNĐ" readonly />
+                        <button type="button" class="btn btn-success js-payment-qr" data-id="@Model.ReturnID"
+                            title="Tạo mã QR thanh toán VietQR (VietinBank)">
+                            <i class="bi bi-qr-code"></i> QR
+                        </button>
+                    </div>
+                    <small class="form-text text-muted">Phí phạt được tính theo mức phạt/ngày lưu trong CSDL và sẽ được tính toán lại sau khi lưu.</small>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <h3>Chi tiết sách đã trả</h3>
+                    @if (Model.returnDetail != null && Model.returnDetail.Any())
+                    {
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tên sách</th>
+                                    <th>Phí quá hạn</th>
+                                    <th>Số ngày quá hạn</th>
+                                    <th>Sách bị hỏng/mất</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detail in Model.returnDetail)
+                                {
+                                    <tr>
+                                        <td>@(detail.book?.TitleBook ?? "N/A")</td>
+                                        <td>@detail.OverdueFine.ToString("N0") VNĐ</td>
+                                        <td>@detail.OverdueDays ngày</td>
+                                        <td>@(detail.IsDamaged || detail.LostFine > 0 ? "CÓ" : "KHÔNG")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="alert alert-warning">Phiếu trả này không có chi tiết sách nào.</p>
+                    }
+                </div>
+
+            </div>
+
+            <a asp-controller="Return" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-save"></i> Lưu chỉnh sửa
+            </button>
+
+        </form>
+    </div>
+</main>
+
+    <div class="modal fade" id="paymentQrModal" tabindex="-1" aria-labelledby="paymentQrModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentQrModalLabel">Mã QR thanh toán (VietQR - VietinBank)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="paymentQrLoading" class="text-muted">Đang tạo mã QR...</div>
+                    <div id="paymentQrError" class="text-danger d-none"></div>
+                    <div id="paymentQrContent" class="d-none">
+                        <img id="paymentQrImage" src="" alt="VietQR" class="img-fluid mb-3" style="max-width: 320px;" />
+                        <div class="text-start small">
+                            <div><strong>Ngân hàng:</strong> <span id="paymentQrBank"></span></div>
+                            <div><strong>Số tài khoản:</strong> <span id="paymentQrAccount"></span></div>
+                            <div><strong>Chủ tài khoản:</strong> <span id="paymentQrAccountName"></span></div>
+                            <div><strong>Số tiền:</strong> <span id="paymentQrAmount" class="text-danger fw-bold"></span></div>
+                            <div><strong>Nội dung:</strong> <span id="paymentQrAddInfo"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section Scripts {
+    @{
+        // Cho phép sử dụng Validation Scripts
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        (function () {
+            const modalEl = document.getElementById('paymentQrModal');
+            if (!modalEl || typeof bootstrap === 'undefined') return;
+            const modal = new bootstrap.Modal(modalEl);
+            const loading = document.getElementById('paymentQrLoading');
+            const errorBox = document.getElementById('paymentQrError');
+            const content = document.getElementById('paymentQrContent');
+            const img = document.getElementById('paymentQrImage');
+
+            async function showQr(id) {
+                loading.classList.remove('d-none');
+                errorBox.classList.add('d-none');
+                content.classList.add('d-none');
+                img.src = '';
+                modal.show();
+                try {
+                    const res = await fetch('@Url.Action("PaymentQr", "Return", new { area = "Admin" })/' + encodeURIComponent(id), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!res.ok) throw new Error('Không thể tạo mã QR.');
+                    const data = await res.json();
+                    if (!data || !data.success) throw new Error('Không thể tạo mã QR.');
+                    img.src = data.imageUrl || '';
+                    document.getElementById('paymentQrBank').textContent = (data.bankName || '') + (data.bankBin ? ' (' + data.bankBin + ')' : '');
+                    document.getElementById('paymentQrAccount').textContent = data.accountNumber || '';
+                    document.getElementById('paymentQrAccountName').textContent = data.accountName || '';
+                    document.getElementById('paymentQrAmount').textContent = Number(data.amount || 0).toLocaleString('vi-VN') + ' VNĐ';
+                    document.getElementById('paymentQrAddInfo').textContent = data.addInfo || '';
+                    loading.classList.add('d-none');
+                    content.classList.remove('d-none');
+                } catch (e) {
+                    loading.classList.add('d-none');
+                    errorBox.textContent = e && e.message ? e.message : 'Có lỗi xảy ra khi tạo mã QR.';
+                    errorBox.classList.remove('d-none');
+                }
+            }
+
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.js-payment-qr');
+                if (!btn) return;
+                const id = btn.getAttribute('data-id');
+                if (id) showQr(id);
+            });
+        })();
+    </script>
+}
+

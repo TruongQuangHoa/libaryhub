@@ -1,0 +1,635 @@
+@using LibraryHub.Areas.Admin.Models
+@using static LibraryHub.Services.LibraryStatisticsService
+@model StatisticsViewModel
+
+@{
+    ViewData["Title"] = "Thống Kê Thư Viện";
+}
+
+<h2 class="mb-4">📊 Thống Kê Tổng Quan Thư Viện</h2>
+<main id="main" class="main">
+    <div class="row">
+    
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2 bg-primary text-white">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">TỔNG SỐ ĐẦU SÁCH</div>
+                            <div class="h5 mb-0 font-weight-bold">@(Model.Summary?.TotalBooks ?? 0)</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-book fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2 bg-success text-white">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">ĐỘC GIẢ HOẠT ĐỘNG</div>
+                            <div class="h5 mb-0 font-weight-bold">@(Model.Summary?.TotalActivePatrons ?? 0)</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-user-friends fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2 bg-warning text-white">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">TỔNG PHIẾU MƯỢN</div>
+                            <div class="h5 mb-0 font-weight-bold">@(Model.Summary?.TotalBorrowingRecords ?? 0)</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-clipboard-list fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2 bg-info text-white">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">TỔNG THỂ LOẠI</div>
+                            <div class="h5 mb-0 font-weight-bold">@(Model.Summary?.TotalCategories ?? 0)</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-layer-group fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @* THỐNG KÊ DOANH THU VÀ SỐ LƯỢT MƯỢN *@
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-primary text-white">
+                        <h5 class="m-0 font-weight-bold">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            THỐNG KÊ DOANH THU VÀ LƯỢT MƯỢN SÁCH
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                @TempData["Error"]
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        }
+                        
+                        @* BỘ LỌC THỜI GIAN *@
+                        <form method="get" asp-area="Admin" asp-controller="Home" asp-action="Index"
+                              class="border rounded p-3 mb-4">
+
+                            <div class="row align-items-end">
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="startDate" class="form-label">
+                                        Từ ngày
+                                    </label>
+
+                                    <input type="date" id="startDate" name="startDate" class="form-control"
+                                           value="@Model.StartDate.ToString("yyyy-MM-dd")" required />
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="endDate" class="form-label">
+                                        Đến ngày
+                                    </label>
+
+                                    <input type="date" id="endDate" name="endDate" class="form-control"
+                                           value="@Model.EndDate.ToString("yyyy-MM-dd")" required />
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i>
+                                        Thống kê
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            <small class="text-muted">
+                                Mặc định hiển thị số liệu của tháng hiện tại.
+                                Chọn khoảng thời gian khác và nhấn Thống kê để xem dữ liệu.
+                            </small>
+
+                        </form>
+
+
+
+                        @* Các thẻ tổng hợp *@
+                        <div class="row">
+
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card bg-primary text-white h-100">
+                                    <div class="card-body">
+                                        <div class="text-uppercase small font-weight-bold">
+                                            Tổng số lượt mượn
+                                        </div>
+                                        <div class="h3 font-weight-bold mb-0">
+                                            @(Model.RevenueStatistics?.TotalBorrowings ?? 0)
+                                        </div>
+                                        <small>Trong khoảng thời gian đã chọn</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card bg-success text-white h-100">
+                                    <div class="card-body">
+                                        <div class="text-uppercase small font-weight-bold">
+                                            Tổng phí mượn sách
+                                        </div>
+                                        <div class="h3 font-weight-bold mb-0">
+                                            @((Model.RevenueStatistics?.TotalBorrowingRevenue ?? 0).ToString("N0"))
+                                            ₫
+                                        </div>
+                                        <small>Ghi nhận theo ngày mượn</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card bg-danger text-white h-100">
+                                    <div class="card-body">
+                                        <div class="text-uppercase small font-weight-bold">
+                                            Tổng tiền phạt
+                                        </div>
+                                        <div class="h3 font-weight-bold mb-0">
+                                            @((Model.RevenueStatistics?.TotalFineRevenue ?? 0).ToString("N0"))
+                                            ₫
+                                        </div>
+                                        <small>Ghi nhận theo ngày trả sách</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        @* Tổng doanh thu *@
+                        <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap">
+                            <strong>
+                                <i class="fas fa-coins mr-2"></i>
+                                TỔNG DOANH THU
+                            </strong>
+
+                            <span class="h4 font-weight-bold mb-0 text-primary">
+                                @((Model.RevenueStatistics?.TotalRevenue ?? 0).ToString("N0")) ₫
+                            </span>
+                        </div>
+
+                        @* Biểu đồ *@
+                        <h6 class="font-weight-bold text-primary mt-4 mb-3">
+                            BIỂU ĐỒ DOANH THU VÀ SỐ LƯỢT MƯỢN
+                        </h6>
+
+                        <div style="height: 380px; position: relative;">
+                            <canvas id="revenueBorrowingChart"></canvas>
+                        </div>
+
+                        @* Bảng chi tiết *@
+                        <h6 class="font-weight-bold text-primary mt-4 mb-3">
+                            CHI TIẾT THỐNG KÊ
+                        </h6>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th class="text-center">STT</th>
+                                        <th class="text-center">Thời gian</th>
+                                        <th class="text-center">Số lượt mượn</th>
+                                        <th class="text-right">Phí mượn sách</th>
+                                        <th class="text-right">Tiền phạt</th>
+                                        <th class="text-right">Tổng doanh thu</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (Model.RevenueStatistics?.Details != null
+                                        && Model.RevenueStatistics.Details.Any())
+                                    {
+                                        int index = 1;
+
+                                        foreach (var item in Model.RevenueStatistics.Details)
+                                        {
+                                            string displayDate = Model.StatisticsType switch
+                                            {
+                                                "month" => item.Date.ToString("MM/yyyy"),
+                                                "year" => item.Date.ToString("yyyy"),
+                                                _ => item.Date.ToString("dd/MM/yyyy")
+                                            };
+
+                                            <tr>
+                                                <td class="text-center">@(index++)</td>
+                                                <td class="text-center">@displayDate</td>
+                                                <td class="text-center">
+                                                    @item.TotalBorrowings
+                                                </td>
+                                                <td class="text-right">
+                                                    @item.BorrowingRevenue.ToString("N0") ₫
+                                                </td>
+                                                <td class="text-right">
+                                                    @item.FineRevenue.ToString("N0") ₫
+                                                </td>
+                                                <td class="text-right font-weight-bold">
+                                                    @item.TotalRevenue.ToString("N0") ₫
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">
+                                                Không có dữ liệu thống kê trong khoảng thời gian này.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Biểu đồ mượn sách theo tháng</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.MonthlyBorrowing != null && Model.MonthlyBorrowing.Any())
+                    {
+                        <div class="chart-area">
+                            @* Đây là nơi bạn sẽ nhúng thư viện biểu đồ như Chart.js *@
+                            <canvas id="monthlyBorrowingChart"></canvas>
+                        </div>
+                        <p class="mt-3">Dữ liệu thô: @string.Join(", ", Model.MonthlyBorrowing.OrderBy(m =>
+                                                                                                                                        m.Month).Select(m => $"{m.Month}: {m.TotalBorrowings}"))</p>
+                        }
+                else
+                        {
+                            <p>Không có dữ liệu mượn sách cho năm 2025 để vẽ biểu đồ.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-5">
+                <div class="card shadow mb-4">
+                    <div
+                        class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-danger text-white">
+                        <h6 class="m-0 font-weight-bold">🔥 Top sách mượn nhiều nhất</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.TopBooks != null && Model.TopBooks.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var book in Model.TopBooks)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="font-weight-bold">@book.TitleBook</span>
+                                            <small class="d-block text-muted">@book.Author</small>
+                                        </div>
+                                        <span class="badge badge-danger badge-pill">@book.BorrowQuantity</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>Chưa có dữ liệu sách được mượn.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-secondary text-white">
+                        <h6 class="m-0 font-weight-bold">📖 Thống kê sách theo thể Loại</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.BooksByCategory != null && Model.BooksByCategory.Any())
+                        {
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Thể loại</th>
+                                        <th class="text-right">Số lượng đầu sách</th>
+                                        <th class="text-right">Tổng bản sách</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var category in Model.BooksByCategory)
+                                    {
+                                        <tr>
+                                            <td>@category.CategoryName</td>
+                                            <td class="text-right">@category.BookCount</td>
+                                            <td class="text-right">@category.TotalQuantity</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>Chưa có dữ liệu thể loại.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // ==================================================
+                // 1. BIỂU ĐỒ SỐ LƯỢT MƯỢN SÁCH THEO THÁNG
+                // ==================================================
+
+                var monthlyCanvas = document.getElementById('monthlyBorrowingChart');
+
+                if (monthlyCanvas) {
+
+                    // Lấy dữ liệu thống kê từ C#
+                    var monthlyData = @Html.Raw(
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        System.Text.Json.JsonSerializer.Serialize(
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Model.MonthlyBorrowing ?? new List<MonthlyBorrowing>()
+                                        )
+                                        );
+
+                    var monthlyLabels = monthlyData.map(function (item) {
+                        return 'Tháng ' + item.Month;
+                    });
+
+                    var monthlyCounts = monthlyData.map(function (item) {
+                        return item.TotalBorrowings;
+                    });
+
+                    // Khởi tạo biểu đồ
+                    new Chart(monthlyCanvas, {
+                        type: 'line',
+
+                        data: {
+                            labels: monthlyLabels,
+
+                            datasets: [{
+                                label: 'Số phiếu mượn',
+                                data: monthlyCounts,
+
+                                borderColor: 'rgba(78, 115, 223, 1)',
+                                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+
+                                borderWidth: 2,
+                                pointRadius: 4,
+                                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+
+                                tension: 0.3,
+                                fill: true
+                            }]
+                        },
+
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+
+                            scales: {
+                                x: {
+                                    grid: {
+                                        display: false
+                                    }
+                                },
+
+                                y: {
+                                    beginAtZero: true,
+
+                                    ticks: {
+                                        precision: 0
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+
+                // ==================================================
+                // 2. BIỂU ĐỒ DOANH THU VÀ SỐ LƯỢT MƯỢN
+                // ==================================================
+
+                var revenueCanvas = document.getElementById('revenueBorrowingChart');
+
+                if (revenueCanvas) {
+
+                    // Lấy dữ liệu doanh thu và lượt mượn từ C#
+                    var statisticsData = @Html.Raw(
+                                        System.Text.Json.JsonSerializer.Serialize(
+                                        Model.RevenueStatistics?.Details
+                                        ?? new List<RevenueBorrowingStatistics>()
+                                        )
+                                        );
+
+                    var statisticsType = '@Model.StatisticsType';
+
+                    // Chuyển đổi ngày tháng thành nhãn hiển thị
+                    var chartLabels = statisticsData.map(function (item) {
+
+                        var date = item.Date.substring(0, 10);
+                        var parts = date.split('-');
+
+                        if (statisticsType === 'year') {
+                            return parts[0];
+                        }
+
+                        if (statisticsType === 'month') {
+                            return parts[1] + '/' + parts[0];
+                        }
+
+                        return parts[2] + '/' + parts[1] + '/' + parts[0];
+                    });
+
+                    // Dữ liệu doanh thu
+                    var revenueValues = statisticsData.map(function (item) {
+                        return item.BorrowingRevenue + item.FineRevenue;
+                    });
+
+                    // Dữ liệu số lượt mượn
+                    var borrowingValues = statisticsData.map(function (item) {
+                        return item.TotalBorrowings;
+                    });
+
+                    // Khởi tạo biểu đồ
+                    new Chart(revenueCanvas, {
+
+                        type: 'line',
+
+                        data: {
+                            labels: chartLabels,
+
+                            datasets: [
+
+                                // Đường biểu diễn doanh thu
+                                {
+                                    label: 'Doanh thu (VNĐ)',
+                                    data: revenueValues,
+
+                                    borderColor: 'rgba(40, 167, 69, 1)',
+                                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    tension: 0.3,
+                                    fill: true,
+
+                                    yAxisID: 'yRevenue'
+                                },
+
+                                // Đường biểu diễn số lượt mượn
+                                {
+                                    label: 'Số lượt mượn',
+                                    data: borrowingValues,
+
+                                    borderColor: 'rgba(78, 115, 223, 1)',
+                                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+
+                                    borderWidth: 2,
+                                    pointRadius: 3,
+                                    tension: 0.3,
+
+                                    yAxisID: 'yBorrowing'
+                                }
+                            ]
+                        },
+
+                        options: {
+
+                            responsive: true,
+                            maintainAspectRatio: false,
+
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+
+                            plugins: {
+
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+
+                                tooltip: {
+                                    callbacks: {
+
+                                        label: function (context) {
+
+                                            var value = context.parsed.y;
+
+                                            // Định dạng doanh thu theo tiền Việt Nam
+                                            if (context.dataset.yAxisID === 'yRevenue') {
+
+                                                return context.dataset.label + ': ' +
+                                                    new Intl.NumberFormat('vi-VN').format(value) + ' ₫';
+                                            }
+
+                                            return context.dataset.label + ': ' + value;
+                                        }
+                                    }
+                                }
+                            },
+
+                            scales: {
+
+                                // Trục doanh thu bên trái
+                                yRevenue: {
+                                    type: 'linear',
+                                    position: 'left',
+                                    beginAtZero: true,
+
+                                    title: {
+                                        display: true,
+                                        text: 'Doanh thu (VNĐ)'
+                                    },
+
+                                    ticks: {
+                                        callback: function (value) {
+
+                                            return new Intl.NumberFormat('vi-VN', {
+                                                notation: 'compact'
+                                            }).format(value);
+                                        }
+                                    }
+                                },
+
+                                // Trục số lượt mượn bên phải
+                                yBorrowing: {
+                                    type: 'linear',
+                                    position: 'right',
+                                    beginAtZero: true,
+
+                                    title: {
+                                        display: true,
+                                        text: 'Số lượt mượn'
+                                    },
+
+                                    ticks: {
+                                        precision: 0
+                                    },
+
+                                    grid: {
+                                        drawOnChartArea: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+
+                // ==================================================
+                // 3. GHI NHẬN PHIÊN LÀM VIỆC CỦA ADMIN
+                // ==================================================
+
+                sessionStorage.setItem('AdminSessionActive', 'true');
+
+            });
+        </script>
+    }

@@ -1,0 +1,47 @@
+@model LibraryHub.Models.tblCategory
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Thêm thể loại sách</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-controller="Category" asp-action="Create">
+            <div class="form-row">
+                <div class="form-group col-md-6 mb-3">
+                    <lable>Nhập thể loại sách</lable>
+                    <input type="text" class="form-control" asp-for="CategoryName" placeholder="Nhập tên thể loại sách..." required>
+                    <span asp-validation-for="CategoryName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mô tả</label>
+                    <input type="text" class="form-control" asp-for="Description" placeholder="Nhập mô tả..." required>
+                    <span asp-validation-for="Description" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Biểu tượng</label>
+                    <input type="text" class="form-control" asp-for="Icon" placeholder="Nhập biểu tượng..." required>
+                    <span asp-validation-for="Icon" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", false)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+            <a asp-controller="Category" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>

@@ -1,0 +1,265 @@
+
+@using LibraryHub.ViewModels
+@model PostManagementViewModel
+
+@{
+    ViewData["Title"] = "Quản lý bài viết";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+<div class="pagetitle">
+    <h1>Quản lý bài viết</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">Quản trị</li>
+            <li class="breadcrumb-item active">Bài viết</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+                <h5 class="card-title mb-0">Danh sách bài viết</h5>
+
+                <a asp-area="Admin"
+                   asp-controller="Post"
+                   asp-action="Create"
+                   class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Thêm bài viết
+                </a>
+            </div>
+
+            <form method="get"
+                  asp-area="Admin"
+                  asp-controller="Post"
+                  asp-action="Index"
+                  class="row g-2 mb-4">
+
+                <div class="col-lg-4">
+                    <input type="text"
+                           name="keyword"
+                           value="@Model.Keyword"
+                           class="form-control"
+                           placeholder="Tìm tiêu đề, tác giả, mô tả..." />
+                </div>
+
+                <div class="col-lg-3">
+                    <select name="category" class="form-select">
+                        <option value="">-- Tất cả danh mục --</option>
+                        @foreach (var item in Model.Categories)
+                        {
+                            <option value="@item"
+                                    selected="@(Model.CategoryFilter == item)">
+                                @item
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-3">
+                    <select name="status" class="form-select">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="active" selected="@(Model.StatusFilter == "active")">Đang hoạt động</option>
+                        <option value="inactive" selected="@(Model.StatusFilter == "inactive")">Ngừng hoạt động</option>
+                        <option value="published" selected="@(Model.StatusFilter == "published")">Đã xuất bản</option>
+                        <option value="scheduled" selected="@(Model.StatusFilter == "scheduled")">Lên lịch</option>
+                        <option value="draft" selected="@(Model.StatusFilter == "draft")">Bản nháp</option>
+                        <option value="featured" selected="@(Model.StatusFilter == "featured")">Nổi bật</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                        Lọc
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="width:60px">ID</th>
+                            <th style="width:110px">Ảnh bìa</th>
+                            <th>Thông tin bài viết</th>
+                            <th style="width:130px">Danh mục</th>
+                            <th style="width:145px">Xuất bản</th>
+                            <th class="text-center" style="width:100px">Nổi bật</th>
+                            <th class="text-center" style="width:100px">Hoạt động</th>
+                            <th class="text-center" style="width:170px">Thao tác</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    @if (Model.Posts.Any())
+                    {
+                        foreach (var item in Model.Posts)
+                        {
+                            var isScheduled =
+                                item.IsPublished &&
+                                item.PublishedDate.HasValue &&
+                                item.PublishedDate.Value > DateTime.Now;
+
+                            <tr>
+                                <td class="text-center">@item.PostID</td>
+
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(item.Thumbnail))
+                                    {
+                                        <img src="@item.Thumbnail"
+                                             alt="@item.Title"
+                                             style="width:90px;height:65px;object-fit:cover"
+                                             class="rounded" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light text-muted text-center rounded p-3">
+                                            <i class="bi bi-image"></i>
+                                        </div>
+                                    }
+                                </td>
+
+                                <td>
+                                    <strong>@item.Title</strong>
+
+                                    <div class="small text-muted mt-1">
+                                        Tác giả: @(item.AuthorName ?? "Chưa cập nhật")
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        Slug: @item.Slug
+                                    </div>
+
+                                    <div class="small text-muted">
+                                        Ngày tạo: @item.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @(item.Category ?? "Chưa phân loại")
+                                </td>
+
+                                <td>
+                                    @if (!item.IsPublished)
+                                    {
+                                        <span class="badge bg-secondary">Bản nháp</span>
+                                    }
+                                    else if (isScheduled)
+                                    {
+                                        <span class="badge bg-warning text-dark">Đã lên lịch</span>
+                                        <div class="small mt-1">
+                                            @item.PublishedDate?.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Đã xuất bản</span>
+                                        <div class="small mt-1">
+                                            @item.PublishedDate?.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                    <form asp-action="ToggleFeatured"
+                                          asp-route-id="@item.PostID"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm @(item.IsFeatured ? "btn-warning" : "btn-outline-secondary")"
+                                                title="Bật/tắt nổi bật">
+                                            <i class="bi bi-star-fill"></i>
+                                        </button>
+                                    </form>
+                                </td>
+
+                                <td class="text-center">
+                                    <form asp-action="ToggleStatus"
+                                          asp-route-id="@item.PostID"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm @(item.IsActive ? "btn-success" : "btn-outline-secondary")"
+                                                title="Bật/tắt hoạt động">
+                                            <i class="bi @(item.IsActive ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                        </button>
+                                    </form>
+                                </td>
+
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.PostID"
+                                           class="btn btn-sm btn-primary"
+                                           title="Chỉnh sửa">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
+                                        <form asp-action="TogglePublish"
+                                              asp-route-id="@item.PostID"
+                                              method="post">
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-success"
+                                                    title="Bật/tắt xuất bản">
+                                                <i class="bi bi-send"></i>
+                                            </button>
+                                        </form>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@item.PostID"
+                                           class="btn btn-sm btn-danger"
+                                           title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Không tìm thấy bài viết nào.
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-muted small">
+                Tổng số bài viết: <strong>@Model.Posts.Count</strong>
+            </div>
+
+        </div>
+    </div>
+</section>
+</main>

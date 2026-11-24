@@ -1,0 +1,580 @@
+@model LibraryHub.Models.tblLibrarian
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Thêm thủ thư mới</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="post" asp-action="Create" enctype="multipart/form-data">
+            <div class="form-row row">
+                <div class="form-group col-md-6 mb-3">
+                    <label>Họ và tên</label>
+                    <input type="text" class="form-control" asp-for="FullName" placeholder="Nhập họ và tên..." required>
+                    <span asp-validation-for="FullName" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+
+                    <input asp-for="Email" type="email" class="form-control" placeholder="Nhập Email..."
+                           autocomplete="off" />
+
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label class="form-label">Ảnh thủ thư</label>
+
+                    <input type="file" id="ImageFile" name="photo" class="form-control"
+                           accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+
+                    <small class="text-muted">
+                        Định dạng JPG, JPEG, PNG, GIF, WEBP. Dung lượng tối đa 5MB.
+                    </small>
+
+                    <span class="text-danger">
+                        @Html.ValidationMessage("Photo")
+                    </span>
+
+                    <div class="mt-2">
+                        <img id="imagePreview" src="#" alt="Xem trước ảnh" style="
+                        display:none;
+                        width:150px;
+                        height:150px;
+                        object-fit:cover;
+                        border-radius:8px;
+                        border:1px solid #ddd;
+                        " />
+                    </div>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Ngày sinh</label>
+                    <input type="date" class="form-control" asp-for="Birth" placeholder="Nhập ngày sinh..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Giới tính</label>
+                    <select asp-for="Gender" class="form-select" id="Gender" required>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Tỉnh/Thành phố</label>
+                    <input id="provinceInput" class="form-control" name="Province" value="@Model?.Province"
+                           placeholder="Nhập hoặc chọn tỉnh/thành phố" autocomplete="off" required />
+                    <select id="provinceSelect" size="5" class="form-select mt-1" style="display:none;"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Xã/Phường</label>
+                    <input id="wardInput" class="form-control" name="Commune" value="@Model?.Commune"
+                           placeholder="Nhập hoặc chọn xã/phường" autocomplete="off" required />
+                    <select id="wardSelect" size="5" class="form-select mt-1" style="display:none;"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Nhập xóm</label>
+                    <input type="text" class="form-control" id="hamletInput" name="Hamlet" value="@Model?.Hamlet"
+                           placeholder="Nhập xóm..." required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Quốc tịch</label>
+                    <input id="quocTich" class="form-control" name="Nationality"
+                           value="@(Model?.Nationality ?? "Việt Nam")" placeholder="Việt Nam" required />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Địa chỉ đầy đủ</label>
+                    <input id="address" class="form-control" name="Address" value="@Model?.Address" readonly />
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Trạng thái thủ thư</label>
+                    <select asp-for="StatusLibrarian" class="form-select" id="StatusTeacher" required>
+                        <option value="Đang làm">Đang làm</option>
+                        <option value="Nghỉ làm">Nghỉ làm</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>CCCD</label>
+                    <input type="text" class="form-control" asp-for="CCCD" placeholder="Nhập CCCD..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Dân tộc</label>
+                    <input type="text" class="form-control" asp-for="Nation" placeholder="Nhập dân tộc..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tôn giáo</label>
+                    <select asp-for="Religion" class="form-select" id="Religion" required>
+                        <option value="">--- Chọn ---</option>
+                        <option value="Có">Có</option>
+                        <option value="Không">Không</option>
+                        <option value="Không xác định">Không xác định</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Số điện thoại</label>
+                    <input type="tel" class="form-control" asp-for="NumberPhone" placeholder="Nhập số điện thoại..."
+                           required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mã BHXH</label>
+                    <input type="text" class="form-control" asp-for="NumberBHXH" placeholder="Nhập BHXH..." required>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", false)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+
+            <a asp-controller="Librarian" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // =====================================================
+            // PROVINCE / WARD
+            // =====================================================
+
+            const hamletInput = document.getElementById('hamletInput');
+            const provinceInput = document.getElementById('provinceInput');
+            const provinceSelect = document.getElementById('provinceSelect');
+
+            const wardInput = document.getElementById('wardInput');
+            const wardSelect = document.getElementById('wardSelect');
+
+            const quocTichInput = document.getElementById('quocTich');
+            const addressInput = document.getElementById('address');
+
+            let provinces = [];
+            let wards = [];
+
+            fetch('https://provinces.open-api.vn/api/p/')
+                .then(res => res.json())
+                .then(data => {
+                    provinces = data;
+                    renderSelectOptions(provinceSelect, provinces);
+                });
+
+            function renderSelectOptions(selectElem, items) {
+
+                selectElem.innerHTML = '';
+
+                items.forEach(item => {
+
+                    const option = document.createElement('option');
+
+                    option.value = item.code;
+                    option.textContent = item.name;
+
+                    selectElem.appendChild(option);
+                });
+            }
+
+            function filterItems(list, text) {
+
+                return list.filter(item =>
+                    item.name
+                        .toLowerCase()
+                        .includes(text.toLowerCase())
+                );
+            }
+
+            function toggleDropdown(selectElem, show) {
+
+                selectElem.style.display =
+                    show ? 'block' : 'none';
+            }
+
+            // =====================================================
+            // PROVINCE
+            // =====================================================
+
+            provinceInput.addEventListener('focus', () => {
+
+                renderSelectOptions(
+                    provinceSelect,
+                    provinces
+                );
+
+                toggleDropdown(
+                    provinceSelect,
+                    true
+                );
+            });
+
+            provinceInput.addEventListener('input', () => {
+
+                const filtered =
+                    filterItems(
+                        provinces,
+                        provinceInput.value
+                    );
+
+                renderSelectOptions(
+                    provinceSelect,
+                    filtered
+                );
+
+                toggleDropdown(
+                    provinceSelect,
+                    filtered.length > 0
+                );
+            });
+
+            provinceInput.addEventListener('blur', () => {
+
+                setTimeout(() => {
+
+                    toggleDropdown(
+                        provinceSelect,
+                        false
+                    );
+
+                }, 200);
+            });
+
+            provinceSelect.addEventListener('click', () => {
+
+                const selected =
+                    provinceSelect.options[
+                    provinceSelect.selectedIndex
+                    ];
+
+                if (!selected) return;
+
+                provinceInput.value =
+                    selected.textContent;
+
+                toggleDropdown(
+                    provinceSelect,
+                    false
+                );
+
+                loadWards(selected.value);
+
+                wardInput.value = '';
+
+                updateFullAddress();
+            });
+
+            // =====================================================
+            // LOAD WARDS
+            // =====================================================
+
+            function loadWards(provinceCode) {
+
+                fetch(
+                    `https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`
+                )
+                    .then(res => res.json())
+                    .then(data => {
+
+                        wards =
+                            data.districts
+                                .flatMap(
+                                    district => district.wards
+                                ) || [];
+
+                        renderSelectOptions(
+                            wardSelect,
+                            wards
+                        );
+
+                        wardInput.disabled = false;
+                    })
+                    .catch(error => {
+
+                        console.error(
+                            "Error loading wards:",
+                            error
+                        );
+
+                        wards = [];
+
+                        renderSelectOptions(
+                            wardSelect,
+                            []
+                        );
+
+                        wardInput.disabled = true;
+                    });
+            }
+
+            // =====================================================
+            // WARD
+            // =====================================================
+
+            wardInput.addEventListener('focus', () => {
+
+                if (
+                    provinceInput.value &&
+                    wards.length === 0
+                ) {
+
+                    const currentProvince =
+                        provinces.find(
+                            p =>
+                                p.name ===
+                                provinceInput.value
+                        );
+
+                    if (currentProvince) {
+
+                        loadWards(
+                            currentProvince.code
+                        );
+                    }
+
+                } else {
+
+                    renderSelectOptions(
+                        wardSelect,
+                        wards
+                    );
+                }
+
+                toggleDropdown(
+                    wardSelect,
+                    true
+                );
+            });
+
+            wardInput.addEventListener('input', () => {
+
+                const filtered =
+                    filterItems(
+                        wards,
+                        wardInput.value
+                    );
+
+                renderSelectOptions(
+                    wardSelect,
+                    filtered
+                );
+
+                toggleDropdown(
+                    wardSelect,
+                    filtered.length > 0
+                );
+            });
+
+            wardInput.addEventListener('blur', () => {
+
+                setTimeout(() => {
+
+                    toggleDropdown(
+                        wardSelect,
+                        false
+                    );
+
+                }, 200);
+            });
+
+            wardSelect.addEventListener('click', () => {
+
+                const selected =
+                    wardSelect.options[
+                    wardSelect.selectedIndex
+                    ];
+
+                if (!selected) return;
+
+                wardInput.value =
+                    selected.textContent;
+
+                toggleDropdown(
+                    wardSelect,
+                    false
+                );
+
+                updateFullAddress();
+            });
+
+            // =====================================================
+            // ADDRESS
+            // =====================================================
+
+            [
+                hamletInput,
+                wardInput,
+                provinceInput,
+                quocTichInput
+            ].forEach(input => {
+
+                input.addEventListener(
+                    'input',
+                    updateFullAddress
+                );
+
+                input.addEventListener(
+                    'change',
+                    updateFullAddress
+                );
+            });
+
+            function updateFullAddress() {
+
+                const hamlet =
+                    hamletInput.value.trim();
+
+                const ward =
+                    wardInput.value.trim();
+
+                const province =
+                    provinceInput.value.trim();
+
+                const nation =
+                    quocTichInput.value.trim() ||
+                    "Việt Nam";
+
+                const addressParts = [];
+
+                if (hamlet)
+                    addressParts.push(hamlet);
+
+                if (ward)
+                    addressParts.push(ward);
+
+                if (province)
+                    addressParts.push(province);
+
+                addressParts.push(nation);
+
+                addressInput.value =
+                    addressParts.join(', ');
+            }
+
+            if (
+                provinceInput.value ||
+                wardInput.value ||
+                hamletInput.value
+            ) {
+                updateFullAddress();
+            }
+
+
+            // =====================================================
+            // PREVIEW ẢNH
+            // =====================================================
+
+            const imageFile =
+                document.getElementById('ImageFile');
+
+            const imagePreview =
+                document.getElementById('imagePreview');
+
+            if (imageFile && imagePreview) {
+
+                imageFile.addEventListener(
+                    'change',
+                    function (event) {
+
+                        const file =
+                            event.target.files[0];
+
+                        if (!file) {
+
+                            imagePreview.style.display =
+                                'none';
+
+                            imagePreview.src = '#';
+
+                            return;
+                        }
+
+                        const allowedTypes = [
+                            'image/jpeg',
+                            'image/png',
+                            'image/gif',
+                            'image/webp'
+                        ];
+
+                        if (
+                            !allowedTypes.includes(
+                                file.type
+                            )
+                        ) {
+
+                            alert(
+                                'Vui lòng chọn ảnh JPG, JPEG, PNG, GIF hoặc WEBP.'
+                            );
+
+                            event.target.value = '';
+
+                            imagePreview.style.display =
+                                'none';
+
+                            imagePreview.src = '#';
+
+                            return;
+                        }
+
+                        if (
+                            file.size >
+                            5 * 1024 * 1024
+                        ) {
+
+                            alert(
+                                'Dung lượng ảnh không được vượt quá 5MB.'
+                            );
+
+                            event.target.value = '';
+
+                            imagePreview.style.display =
+                                'none';
+
+                            imagePreview.src = '#';
+
+                            return;
+                        }
+
+                        const reader =
+                            new FileReader();
+
+                        reader.onload = function (e) {
+
+                            imagePreview.src =
+                                e.target.result;
+
+                            imagePreview.style.display =
+                                'block';
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                );
+            }
+
+        });
+    </script>
+}

@@ -1,0 +1,216 @@
+@using LibraryHub.Models;
+@model IList<tblReturn>
+@{
+    ViewData["Title"] = "Quản lý Phiếu Trả";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var paidReturnIds = ViewBag.PaidReturnIds as HashSet<int> ?? new HashSet<int>();
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách phiếu trả</h2>
+        <p>
+        <section class="section dashboard">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card recent-sales overflow-auto">
+                        <div class="card-body mt-4">
+                            @* Thanh tìm kiếm phiếu trả gọn gàng *@
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                <form asp-action="Index" method="get" class="d-flex align-items-center gap-2" style="max-width: 440px; width: 100%;">
+                                    <div class="input-group input-group-sm shadow-sm rounded-pill overflow-hidden border">
+                                        <span class="input-group-text bg-white border-0 ps-3 text-muted">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text" name="search" value="@ViewBag.Search"
+                                               class="form-control border-0 shadow-none py-2"
+                                               placeholder="Tìm theo tên hoặc email độc giả..." />
+                                        @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                        {
+                                            <a asp-action="Index" class="btn bg-white border-0 text-secondary px-2 d-flex align-items-center" title="Xóa tìm kiếm">
+                                                <i class="bi bi-x-lg"></i>
+                                            </a>
+                                        }
+                                        <button type="submit" class="btn btn-primary border-0 px-3 fw-semibold">
+                                            Tìm kiếm
+                                        </button>
+                                    </div>
+                                </form>
+
+                                @if (!string.IsNullOrWhiteSpace(ViewBag.Search as string))
+                                {
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-light text-dark border fw-normal py-2 px-3">
+                                            Kết quả cho: <strong>@ViewBag.Search</strong>
+                                        </span>
+                                        <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                            <i class="bi bi-x-circle me-1"></i>Xóa lọc
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+
+                            <table class="table table-borderless datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="col-1 text-center">STT</th>
+                                        <th class="col-1 text-center">Mã phiếu trả</th>
+                                        <th class="col-1 text-center">Phiếu mượn</th>
+                                        <th class="col-2 text-center">Ngày trả</th>
+                                        <th class="col-2 text-center">Tổng phạt</th>
+                                        <th class="col-2 text-center">Thủ thư</th>
+                                        <th class="col-1 text-center">Trạng thái</th>
+                                        <th class="col-2 text-center">Chức năng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int stt = 0;
+                                    }
+                                    @foreach (var item in Model)
+                                    {
+                                        stt++;
+                                        bool isPaid = paidReturnIds.Contains(item.ReturnID);
+                                        <tr>
+                                            <td class="text-center">@stt</td>
+                                            <td class="text-center">@item.ReturnID</td>
+                                            <td class="text-primary text-center" scope="row">@item.BorrowingID - @item.borrowing?.patron?.PatronName</td>
+                                            <td class="text-center" scope="row">@item.ReturnDate?.ToString("dd/MM/yyyy                       HH:mm")
+                                            </td>
+                                            <td class="text-center" scope="row">
+                                                <span class="badge bg-warning">@item.TotalFine.ToString("N0") VNĐ</span>
+                                            </td>
+                                            <td class="text-center" scope="row">@item.librarian?.FullName</td>
+                                            <td class="text-center">
+                                                @* Chỉ hiển thị "Đã hoàn tất" khi đã xác nhận thanh toán và lưu lịch sử giao dịch *@
+                                                @if (isPaid)
+                                                {
+                                                    <span class="badge bg-success">Đã hoàn tất</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Chưa hoàn tất</span>
+                                                }
+                                            </td>
+                                            <td class="text-center text-nowrap" scope="row">
+                                                <a asp-area="Admin" asp-controller="Return" asp-action="Details"
+                                                    asp-route-id="@item.ReturnID" class="btn btn-info btn-sm text-white"
+                                                    title="Xem chi tiết phiếu trả"><i class="bi bi-eye"></i></a>
+
+                                                <a asp-area="Admin" asp-controller="Return" asp-action="Edit"
+                                                    asp-route-id="@item.ReturnID" class="btn btn-primary btn-sm"
+                                                    title="Chỉnh sửa phiếu trả"><i class="bi bi-pencil"></i></a>
+
+                                                @if (isPaid)
+                                                {
+                                                    <button type="button" class="btn btn-secondary btn-sm" disabled
+                                                        title="Phiếu trả đã thanh toán thành công">
+                                                        <i class="bi bi-qr-code"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-success btn-sm js-payment-qr"
+                                                        data-id="@item.ReturnID" title="Mã QR thanh toán (VietQR)">
+                                                        <i class="bi bi-qr-code"></i>
+                                                    </button>
+                                                }
+
+                                                @* Nút Xóa (Delete) - chỉ nên dùng khi chưa có giao dịch phạt *@
+                                                <a asp-area="Admin" asp-controller="Return" asp-action="Delete"
+                                                    asp-route-id="@item.ReturnID" class="btn btn-danger btn-sm"
+                                                    title="Xóa phiếu trả"><i class="bi bi-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </p>
+    </div>
+
+    <div class="modal fade" id="paymentQrModal" tabindex="-1" aria-labelledby="paymentQrModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentQrModalLabel">Mã QR thanh toán (VietQR)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="paymentQrLoading" class="text-muted">Đang tạo mã QR...</div>
+                    <div id="paymentQrError" class="text-danger d-none"></div>
+                    <div id="paymentQrContent" class="d-none">
+                        <img id="paymentQrImage" src="" alt="VietQR" class="img-fluid mb-3" style="max-width: 320px;" />
+                        <div class="text-start small">
+                            <div><strong>Ngân hàng:</strong> <span id="paymentQrBank"></span></div>
+                            <div><strong>Số tài khoản:</strong> <span id="paymentQrAccount"></span></div>
+                            <div><strong>Chủ tài khoản:</strong> <span id="paymentQrAccountName"></span></div>
+                            <div><strong>Số tiền:</strong> <span id="paymentQrAmount" class="text-danger fw-bold"></span></div>
+                            <div><strong>Nội dung:</strong> <span id="paymentQrAddInfo"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            const modalEl = document.getElementById('paymentQrModal');
+            if (!modalEl) return;
+            const modal = new bootstrap.Modal(modalEl);
+            const loading = document.getElementById('paymentQrLoading');
+            const errorBox = document.getElementById('paymentQrError');
+            const content = document.getElementById('paymentQrContent');
+            const img = document.getElementById('paymentQrImage');
+
+            async function showQr(id) {
+                loading.classList.remove('d-none');
+                errorBox.classList.add('d-none');
+                content.classList.add('d-none');
+                img.src = '';
+                modal.show();
+                try {
+                    const res = await fetch('@Url.Action("PaymentQr", "Return", new { area = "Admin" })/' + encodeURIComponent(id), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!res.ok) throw new Error('Không thể tạo mã QR (HTTP ' + res.status + ').');
+                    const data = await res.json();
+                    if (!data || !data.success) throw new Error((data && data.message) || 'Không thể tạo mã QR.');
+                    img.onerror = function () {
+                        if (data.payload && !img.dataset.fallbackUsed) {
+                            img.dataset.fallbackUsed = '1';
+                            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(data.payload);
+                        }
+                    };
+                    delete img.dataset.fallbackUsed;
+                    img.src = data.imageUrl || (data.payload ? 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(data.payload) : '');
+                    document.getElementById('paymentQrBank').textContent = (data.bankName || '') + (data.bankBin ? ' (' + data.bankBin + ')' : '');
+                    document.getElementById('paymentQrAccount').textContent = data.accountNumber || '';
+                    document.getElementById('paymentQrAccountName').textContent = data.accountName || '';
+                    document.getElementById('paymentQrAmount').textContent = Number(data.amount || 0).toLocaleString('vi-VN') + ' VNĐ';
+                    document.getElementById('paymentQrAddInfo').textContent = data.addInfo || '';
+                    loading.classList.add('d-none');
+                    content.classList.remove('d-none');
+                } catch (e) {
+                    loading.classList.add('d-none');
+                    errorBox.textContent = e && e.message ? e.message : 'Có lỗi xảy ra khi tạo mã QR.';
+                    errorBox.classList.remove('d-none');
+                }
+            }
+
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.js-payment-qr');
+                if (!btn) return;
+                const id = btn.getAttribute('data-id');
+                if (id) showQr(id);
+            });
+        })();
+    </script>
+}

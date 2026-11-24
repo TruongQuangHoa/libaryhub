@@ -1,0 +1,302 @@
+
+@using LibraryHub.ViewModels
+@model PostManagementViewModel
+
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+      rel="stylesheet" />
+
+<div asp-validation-summary="ModelOnly"
+     class="alert alert-danger"></div>
+
+<div class="row">
+
+    <div class="col-lg-8">
+
+        <div class="card">
+            <div class="card-body">
+
+                <h5 class="card-title">Nội dung bài viết</h5>
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">
+                        Tiêu đề bài viết <span class="text-danger">*</span>
+                    </label>
+
+                    <input asp-for="Title"
+                           class="form-control"
+                           placeholder="Nhập tiêu đề bài viết..." />
+
+                    <span asp-validation-for="Title"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Summary" class="form-label">
+                        Mô tả ngắn
+                    </label>
+
+                    <textarea asp-for="Summary"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Nhập phần giới thiệu ngắn..."></textarea>
+
+                    <span asp-validation-for="Summary"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Nội dung chi tiết <span class="text-danger">*</span>
+                    </label>
+
+                    <div id="postEditor"
+                         style="height:450px;background:white">
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="Content"
+                           id="Content" />
+
+                    <span asp-validation-for="Content"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+
+                <h5 class="card-title">Thông tin SEO</h5>
+
+                <div class="mb-3">
+                    <label asp-for="MetaTitle" class="form-label">
+                        Meta Title
+                    </label>
+
+                    <input asp-for="MetaTitle"
+                           class="form-control"
+                           placeholder="Tiêu đề SEO..." />
+
+                    <span asp-validation-for="MetaTitle"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="MetaDescription" class="form-label">
+                        Meta Description
+                    </label>
+
+                    <textarea asp-for="MetaDescription"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Mô tả SEO..."></textarea>
+
+                    <span asp-validation-for="MetaDescription"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="card">
+            <div class="card-body">
+
+                <h5 class="card-title">Thông tin bài viết</h5>
+
+                <div class="mb-3">
+                    <label asp-for="Category" class="form-label">
+                        Danh mục
+                    </label>
+
+                    <input asp-for="Category"
+                           class="form-control"
+                           list="postCategories"
+                           placeholder="Nhập hoặc chọn danh mục..." />
+
+                    <datalist id="postCategories">
+                        <option value="Tin tức"></option>
+                        <option value="Hoạt động thư viện"></option>
+                        <option value="Sách hay"></option>
+                        <option value="Sự kiện"></option>
+                        <option value="Thông báo"></option>
+                    </datalist>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AuthorName" class="form-label">
+                        Tên tác giả
+                    </label>
+
+                    <input asp-for="AuthorName"
+                           class="form-control"
+                           placeholder="Tên tác giả..." />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ảnh bìa bài viết</label>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.CurrentThumbnail))
+                    {
+                        <div class="mb-2">
+                            <img src="@Model.CurrentThumbnail"
+                                 class="img-fluid rounded"
+                                 style="max-height:180px;object-fit:cover" />
+                        </div>
+                    }
+
+                    <input asp-for="ThumbnailFile"
+                           type="file"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.gif,.webp" />
+
+                    <small class="text-muted">
+                        JPG, PNG, GIF, WEBP. Tối đa 5MB.
+                    </small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ảnh đại diện tác giả</label>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.CurrentAuthorAvatar))
+                    {
+                        <div class="mb-2">
+                            <img src="@Model.CurrentAuthorAvatar"
+                                 class="rounded-circle"
+                                 style="width:90px;height:90px;object-fit:cover" />
+                        </div>
+                    }
+
+                    <input asp-for="AuthorAvatarFile"
+                           type="file"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.gif,.webp" />
+
+                    <small class="text-muted">
+                        JPG, PNG, GIF, WEBP. Tối đa 5MB.
+                    </small>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+
+                <h5 class="card-title">Xuất bản bài viết</h5>
+
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="IsActive"
+                           class="form-check-input"
+                           type="checkbox" />
+
+                    <label asp-for="IsActive" class="form-check-label">
+                        Hoạt động
+                    </label>
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="IsFeatured"
+                           class="form-check-input"
+                           type="checkbox" />
+
+                    <label asp-for="IsFeatured" class="form-check-label">
+                        Bài viết nổi bật
+                    </label>
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <input asp-for="IsPublished"
+                           class="form-check-input"
+                           type="checkbox"
+                           id="IsPublished" />
+
+                    <label asp-for="IsPublished" class="form-check-label">
+                        Cho phép xuất bản
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PublishedDate" class="form-label">
+                        Ngày và giờ xuất bản
+                    </label>
+
+                    <input asp-for="PublishedDate"
+                           type="datetime-local"
+                           class="form-control"
+                           asp-format="{0:yyyy-MM-ddTHH:mm}"
+                           id="PublishedDate" />
+
+                    <small class="text-muted">
+                        Chọn thời điểm trong tương lai để lên lịch.
+                    </small>
+
+                    <span asp-validation-for="PublishedDate"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const editorElement = document.getElementById("postEditor");
+        const contentInput = document.getElementById("Content");
+        const form = document.getElementById("postForm");
+
+        if (!editorElement || !contentInput || !form) return;
+
+        const quill = new Quill("#postEditor", {
+            theme: "snow",
+            placeholder: "Bắt đầu viết nội dung bài viết...",
+            modules: {
+                toolbar: [
+                    [{ header: [1, 2, 3, false] }],
+                    ["bold", "italic", "underline", "strike"],
+                    [{ color: [] }, { background: [] }],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ align: [] }],
+                    ["blockquote", "link", "image"],
+                    ["clean"]
+                ]
+            }
+        });
+
+        // Nạp nội dung khi chỉnh sửa
+        if (contentInput.value) {
+            quill.root.innerHTML = contentInput.value;
+        }
+
+        // Đồng bộ nội dung vào input trước khi gửi form
+        form.addEventListener("submit", function () {
+            contentInput.value = quill.root.innerHTML;
+        });
+
+        // Bật/tắt trường ngày xuất bản
+        const publishCheckbox = document.getElementById("IsPublished");
+        const dateInput = document.getElementById("PublishedDate");
+
+        function updatePublishDate() {
+            if (!publishCheckbox || !dateInput) return;
+
+            dateInput.disabled = !publishCheckbox.checked;
+        }
+
+        if (publishCheckbox) {
+            publishCheckbox.addEventListener(
+                "change", updatePublishDate);
+
+            updatePublishDate();
+        }
+    });
+</script>

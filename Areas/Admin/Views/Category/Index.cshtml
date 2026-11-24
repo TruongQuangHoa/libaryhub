@@ -1,0 +1,116 @@
+@using LibraryHub.Models;
+@model IList<tblCategory>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách thể loại sách</h2>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body mt-4">
+                        
+                        
+                        
+                        <div class="mb-3">
+
+                            <!-- Hàng 1: Chọn file Excel -->
+                            <form asp-area="Admin" asp-controller="Category" asp-action="ImportExcel" method="post"
+                                  enctype="multipart/form-data">
+
+                                @Html.AntiForgeryToken()
+
+                                <div class="mb-2">
+                                    <input type="file" name="excelFile" class="form-control" accept=".xlsx" required
+                                           style="max-width: 350px;" />
+                                </div>
+
+                                <!-- Hàng 2: Hai nút nằm cạnh nhau -->
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-file-earmark-excel me-1"></i>
+                                        Nhập Excel
+                                    </button>
+
+                                    <a asp-area="Admin" asp-controller="Category" asp-action="DownloadExcelTemplate"
+                                       class="btn btn-outline-primary">
+                                        <i class="bi bi-download me-1"></i>
+                                        Tải file Excel mẫu
+                                    </a>
+                                </div>
+
+                            </form>
+
+                        </div>
+
+
+                        @if (TempData["ImportSuccess"] != null)
+                        {
+                            <div class="alert alert-success">
+                                @TempData["ImportSuccess"]
+                            </div>
+                        }
+
+                        @if (TempData["ImportError"] != null)
+                        {
+                            <div class="alert alert-danger">
+                                @TempData["ImportError"]
+                            </div>
+                        }
+
+                        @if (TempData["ImportDetails"] != null)
+                        {
+                            <div class="alert alert-warning">
+                                <strong>Chi tiết các dòng chưa được nhập:</strong>
+                                <pre class="mb-0 mt-2 text-wrap">@TempData["ImportDetails"]</pre>
+                            </div>
+                        }
+
+                        <table class="table table-hover table-bordered datatable" style="background-color: white;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="text-center">STT</th>
+                                    <th class="text-center">Tên thể loại</th>
+                                    <th class="text-center">Mô tả</th>
+                                    <th class="text-center">Hiển thị</th>
+                                    <th class="text-center">Chức năng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int stt = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    stt++;
+                                    <tr class="table-row">
+                                        <td class="text-center" scope="row">@stt</td>
+                                        <td class="text-primary text-center" scope="row">@item.CategoryName</td>
+                                        <td class="text-center" scope="row">@item.Description</td>
+                                        <td class="text-center" scope="row">@item.IsActive</td>
+                                        <td class="text-center" scope="row">
+                                            <a asp-area="Admin" asp-controller="Category" asp-action="Edit"
+                                               asp-route-id="@item.CategoryID" class="btn btn-primary btn-sm"
+                                               title="Chỉnh sửa thể loại sách"><i class="bi bi-pencil"></i></a>
+                                            <a asp-area="Admin" asp-controller="Category" asp-action="Delete"
+                                               asp-route-id="@item.CategoryID" class="btn btn-danger btn-sm"
+                                               title="Xóa thể loại sách"
+                                               onclick="return confirm('Bạn có chắc chắn muốn xóa thể loại sách này không?');"><i
+                                                class="bi bi-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>

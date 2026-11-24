@@ -1,0 +1,141 @@
+
+@model LibraryHub.Models.tblLibraryReview
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Xóa đánh giá thư viện";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Xóa đánh giá thư viện</h2>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="LibraryReview" asp-action="Index">Đánh giá thư viện</a>
+                </li>
+                <li class="breadcrumb-item active">Xóa đánh giá</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Bạn có chắc chắn muốn xóa đánh giá này không?
+                    <strong>Thao tác này không thể hoàn tác.</strong>
+                </div>
+
+                <div class="row align-items-start">
+                    <div class="col-md-3 text-center mb-3">
+                        @if (!string.IsNullOrWhiteSpace(Model.Avatar))
+                        {
+                            <img src="@Model.Avatar"
+                                 alt="Ảnh @Model.FullName"
+                                 class="img-fluid rounded-circle shadow-sm"
+                                 style="width:130px;height:130px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-center align-items-center bg-light rounded-circle mx-auto"
+                                 style="width:130px;height:130px;">
+                                <i class="bi bi-person-fill text-secondary" style="font-size:60px;"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="col-md-9">
+                        <h5 class="mb-2">@Model.FullName</h5>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ReviewerTitle))
+                        {
+                            <p class="text-muted mb-2">@Model.ReviewerTitle</p>
+                        }
+
+                        <div class="text-warning mb-3">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Model.Rating)
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star"></i>
+                                }
+                            }
+                            <span class="text-dark ms-1">(@Model.Rating/5)</span>
+                        </div>
+
+                        <div class="border rounded p-3 bg-light mb-3">
+                            @Model.ReviewContent
+                        </div>
+
+                        <p class="mb-1">
+                            <strong>Ngày tạo:</strong>
+                            @Model.CreateDate.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Duyệt:</strong>
+                            @if (Model.IsApproved)
+                            {
+                                <span class="badge bg-success">Đã duyệt</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                            }
+                        </p>
+
+                        <p class="mb-0">
+                            <strong>Hiển thị:</strong>
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Đang hiển thị</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Đã ẩn</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+
+                <hr />
+
+                <form asp-area="Admin"
+                      asp-controller="LibraryReview"
+                      asp-action="Delete"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="id" value="@Model.ReviewID" />
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-area="Admin"
+                           asp-controller="LibraryReview"
+                           asp-action="Index"
+                           class="btn btn-warning">
+                            <i class="bi bi-arrow-left-circle"></i> Quay lại
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này không?');">
+                            <i class="bi bi-trash"></i> Xác nhận xóa
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</main>

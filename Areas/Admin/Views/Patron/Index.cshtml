@@ -1,0 +1,164 @@
+@using LibraryHub.Models;
+@model IList<tblPatron>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách độc giả</h2>
+
+        <p>
+            <section class="section dashboard">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card recent-sales overflow-auto">
+                            <div class="card-body mt-4">
+                                
+                                
+
+                                <!-- Khu vực nhập độc giả từ Excel -->
+                                <form asp-area="Admin" asp-controller="Patron" asp-action="ImportExcel" method="post"
+                                      enctype="multipart/form-data">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <!-- Hàng 1: Chọn file -->
+                                    <div class="mb-2">
+                                        <input type="file" name="excelFile" class="form-control" accept=".xlsx" required
+                                               style="max-width: 380px;" />
+                                    </div>
+
+                                    <!-- Hàng 2: Các nút chức năng -->
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-file-earmark-excel me-1"></i>
+                                            Nhập độc giả từ Excel
+                                        </button>
+
+                                        <a asp-area="Admin" asp-controller="Patron" asp-action="DownloadExcelTemplate"
+                                           class="btn btn-primary">
+                                            <i class="bi bi-download me-1"></i>
+                                            Tải file Excel mẫu
+                                        </a>
+                                    </div>
+                                </form>
+
+                                <!-- Thông báo kết quả -->
+                                @if (TempData["ImportSuccess"] != null)
+                                {
+                                    <div class="alert alert-success alert-dismissible fade show">
+                                        @TempData["ImportSuccess"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Đóng"></button>
+                                    </div>
+                                }
+
+                                @if (TempData["ImportError"] != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show">
+                                        @TempData["ImportError"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Đóng"></button>
+                                    </div>
+                                }
+
+                                @if (TempData["ImportDetails"] != null)
+                                {
+                                    <div class="alert alert-warning">
+                                        <strong>Chi tiết lỗi:</strong>
+                                        <pre class="mb-0 mt-2 text-wrap">@TempData["ImportDetails"]</pre>
+                                    </div>
+                                }
+
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-1 text-center">STT</th>
+                                            <th class="col-1 text-center">Ảnh</th>
+                                            <th class="col-2 text-center">Tên độc giả</th>
+                                            <th class="col-3 text-center">Địa chỉ</th>
+                                            <th class="col-1 text-center">Số điện thoại</th>
+                                            <th class="col-1 text-center">Email</th>
+                                            <th class="col-1 text-center">Ngày đăng ký</th>
+                                            <th class="col-1 text-center">Hiển thị</th>
+                                            <th class="col-1 text-center">Chức năng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int stt = 0; // 1. Khai báo và khởi tạo biến đếm
+                                        }
+                                        @foreach (var item in Model)
+                                        {
+                                            stt++; // 2. Tăng biến đếm cho mỗi mục
+                                            <tr>
+                                                <td class="text-center" scope="row">@stt</td>
+                                                <!-- ẢNH -->
+                                                <td class="text-center">
+
+                                                    @if (!string.IsNullOrEmpty(item.ImagePatron))
+                                                    {
+                                                        <img src="@item.ImagePatron" alt="@item.PatronName" style="
+                                                        width:60px;
+                                                        height:60px;
+                                                        object-fit:cover;
+                                                        border-radius:8px;
+                                                        border:1px solid #ddd;
+                                                        " />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div style="
+                                                            width:60px;
+                                                            height:60px;
+                                                            border-radius:8px;
+                                                            background:#f1f1f1;
+                                                            display:flex;
+                                                            align-items:center;
+                                                            justify-content:center;
+                                                            margin:auto;
+                                                            ">
+                                                            <i class="bi bi-person" style="font-size:28px;color:#999;">
+                                                            </i>
+                                                        </div>
+                                                    }
+
+                                                </td>
+                                                <td class="text-left text-primary text-center" scope="row">@item.PatronName</td>
+                                                <td class="text-center" scope="row">@item.Address</td>
+                                                <td class="text-center" scope="row">@item.Phone</td>
+                                                <td class="text-center" scope="row">@item.Email</td>
+                                                <td class="text-center" scope="row">@item.RegisterDate?.ToString("dd/MM/yyyy")
+                                                </td>
+                                                <td class="text-center">
+                                                    <form asp-area="Admin" asp-controller="Patron" asp-action="ToggleStatus"
+                                                          method="post">
+                                                        <input type="hidden" name="id" value="@item.PatronID" />
+                                                        <div class="form-check form-switch d-flex justify-content-center">
+                                                            <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                                   name="IsActive" @(item.IsActive ? "checked" : "")
+                                                                   onchange="this.form.submit()" />
+                                                        </div>
+                                                    </form>
+                                                </td>
+                                                <td class="text-center" scope="row">
+                                                    <a asp-area="Admin" asp-controller="Patron" asp-action="Edit"
+                                                       asp-route-id="@item.PatronID" class="btn btn-primary btn-sm"
+                                                       title="Chỉnh sửa độc giả"><i class="bi bi-pencil"></i></a>
+                                                    <a asp-area="Admin" asp-controller="Patron" asp-action="Delete"
+                                                       asp-route-id="@item.PatronID" class="btn btn-danger btn-sm"
+                                                       title="Xóa độc giả"><i class="bi bi-trash"></i></a>
+
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </p>
+    </div>
+</main>

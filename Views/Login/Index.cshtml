@@ -1,0 +1,323 @@
+@model LibraryHub.Models.tblUsers
+@using LibraryHub.Utilities;
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Đăng nhập";
+
+    string messageClass = "";
+    string message = "";
+
+    // Kiểm tra trực tiếp cả hai nguồn ViewBag và TempData để tránh sót thông báo
+    if (ViewBag.ErrorMessage != null)
+    {
+        message = ViewBag.ErrorMessage;
+        messageClass = "bg-red-100 text-red-700 border-red-300";
+    }
+    else if (TempData["ErrorMessage"] != null)
+    {
+        message = TempData["ErrorMessage"].ToString();
+        messageClass = "bg-red-100 text-red-700 border-red-300";
+    }
+    else if (ViewBag.SuccessMessage != null)
+    {
+        message = ViewBag.SuccessMessage;
+        messageClass = "bg-green-100 text-green-700 border-green-300";
+    }
+    else if (TempData["SuccessMessage"] != null)
+    {
+        message = TempData["SuccessMessage"].ToString();
+        messageClass = "bg-green-100 text-green-700 border-green-300";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - LibraryHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/fonts/fontawesome-free-7.2.0-web/css/all.min.css">
+
+    <!-- Favicons -->
+    <link href="~/assets/img/favicon.png" rel="icon">
+    <link href="~/assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="~/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="~/assets/css/chatbot.css" rel="stylesheet">
+
+    <style>
+        /* Thiết lập font Inter cho toàn bộ trang */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            /* Màu nền xám nhạt */
+        }
+
+        /* Tùy chỉnh màu chính theo hình ảnh (Cyan tươi) */
+        .primary-bg {
+            background-color: #00bcd4;
+            /* Màu Cyan */
+        }
+
+        .primary-text {
+            color: #00bcd4;
+        }
+
+        .primary-hover:hover {
+            background-color: #00a9bb;
+        }
+
+        /* Vị trí tương đối chuẩn cho nhóm input chứa icon con mắt */
+        .input-group {
+            position: relative;
+        }
+
+        .toggle-button {
+            position: absolute;
+            top: 50%;
+            right: 0.75rem;
+            transform: translateY(-50%);
+            padding-top: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+
+    <div class="flex flex-col sm:flex-row max-w-4xl w-full bg-white shadow-2xl rounded-xl overflow-hidden transform transition-all duration-500">
+
+        <div class="primary-bg w-full sm:w-2/5 p-8 flex flex-col justify-center items-center text-white text-center">
+            <div class="mb-6">
+                <div class="text-3xl font-bold">LibraryHub</div>
+                <div class="text-sm font-light">Thư viện tri thức</div>
+            </div>
+
+            <div class="mb-10">
+                @* <svg class="w-20 h-20 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 20l-5.447-2.723A2 2 0 013 16.382V5.618a2 2 0 011.553-1.882L9 2m0 18l6-3m-6 3V2m6 16.382V5.618a2 2 0 00-1.553-1.882L15 2m0 16.382l5.447-2.723A2 2 0 0021 16.382V5.618a2 2 0 00-1.553-1.882L15 2" />
+                </svg> *@
+                <img src="~/assets/img/logo-login-logout.png" alt="LibraryHub">
+            </div>
+
+            <p class="text-2xl font-semibold leading-relaxed">
+                Khám phá tri thức, mở rộng tầm nhìn
+            </p>
+        </div>
+
+        <div class="w-full sm:w-3/5 p-8 sm:p-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Đăng nhập</h2>
+            <p class="text-gray-500 mb-8 text-center">Chào mừng đến với LibraryHub! Vui lòng đăng nhập</p>
+
+            <div id="generalErrorMessage" class="p-3 text-sm rounded-lg @messageClass border mb-6 transition-opacity duration-300"
+                 style="display: @(!string.IsNullOrEmpty(message) ? "block" : "none");">
+                @message
+            </div>
+
+            @using (Html.BeginForm("Index", "Login", FormMethod.Post, new { @class = "space-y-6", id = "loginForm" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label for="Email" class="block text-sm font-medium text-gray-700 flex items-center mb-1">
+                        <i class="fa-solid fa-envelope mr-2 text-gray-400"></i> Email
+                    </label>
+                    @Html.TextBoxFor(m => m.Email, new {
+                        @class = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bcd4] focus:border-[#00bcd4] transition duration-150 shadow-sm",
+                        placeholder = "Nhập Email của bạn",
+                        type = "text", /* Đổi thành text để tránh popup mặc định của trình duyệt, kiểm soát hoàn toàn bằng JS */
+                        id = "Email"
+                    })
+                    <div id="emailError" class="text-red-500 text-xs mt-1 transition-opacity duration-200" style="display: none;"></div>
+                </div>
+
+                <div>
+                    <label for="Password" class="block text-sm font-medium text-gray-700 flex items-center mb-1">
+                        <i class="fa-solid fa-lock mr-2 text-gray-400"></i> Mật khẩu
+                    </label>
+                    <div class="input-group">
+                        @Html.PasswordFor(m => m.Password, new {
+                            @class = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bcd4] focus:border-[#00bcd4] transition duration-150 shadow-sm pr-10",
+                            placeholder = "Nhập mật khẩu",
+                            id = "Password" 
+                        })
+                        <button type="button" id="togglePassword" class="toggle-button text-gray-400 hover:text-gray-600 transition duration-150">
+                            <i id="eye-icon" class="fa-solid fa-eye text-base"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input class="h-4 w-4 text-[#00bcd4] focus:ring-[#00bcd4] border-gray-300 rounded" type="checkbox" name="remember" value="true" id="rememberMe">
+                        <label class="ml-2 block text-sm text-gray-900" for="rememberMe">
+                            Ghi nhớ đăng nhập
+                        </label>
+                    </div>
+                    <a href="@Url.Action("ForgotPassword", "Login")" class="text-sm font-medium primary-text hover:underline">
+                        Quên mật khẩu?
+                    </a>
+                </div>
+
+                <button type="submit" class="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-white text-lg font-semibold primary-bg primary-hover focus:outline-none focus:ring-4 focus:ring-[#00bcd4] focus:ring-opacity-50 transition duration-300 ease-in-out transform hover:scale-[1.01]">
+                    Đăng nhập
+                </button>
+            }
+
+            <div class="mt-6 text-center text-sm text-gray-600">
+                Chưa có tài khoản?
+                <a href="@Url.Action("Index", "Register")" class="font-medium primary-text hover:underline">
+                    Đăng ký ngay
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // ==================== 1. XỬ LÝ ẨN / HIỆN MẬT KHẨU ====================
+            const passwordField = document.getElementById('Password');
+            const toggleButton = document.getElementById('togglePassword');
+            const eyeIcon = document.getElementById('eye-icon');
+
+            if (passwordField && toggleButton) {
+                toggleButton.addEventListener('click', function (e) {
+                    e.preventDefault(); 
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+
+                    if (type === 'password') {
+                        eyeIcon.className = "fa-solid fa-eye text-base";
+                    } else {
+                        eyeIcon.className = "fa-solid fa-eye-slash text-base";
+                    }
+                });
+            }
+
+            // ==================== 2. VALIDATE CLIENT-SIDE ====================
+            const loginForm = document.getElementById('loginForm');
+            const errorBox = document.getElementById('generalErrorMessage');
+            const emailError = document.getElementById('emailError');
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', function (e) {
+                    const emailInput = document.getElementById('Email');
+                    const passwordInput = document.getElementById('Password');
+
+                    let hasError = false;
+                    let firstEmptyInput = null;
+
+                    // Hàm xóa trạng thái lỗi trực quan
+                    function clearInputError(input) {
+                        if (input) {
+                            input.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                            input.classList.add('border-gray-300', 'focus:ring-[#00bcd4]', 'focus:border-[#00bcd4]');
+                        }
+                    }
+
+                    // Hàm gán trạng thái viền đỏ khi có lỗi
+                    function setInputError(input) {
+                        if (input) {
+                            input.classList.remove('border-gray-300', 'focus:ring-[#00bcd4]', 'focus:border-[#00bcd4]');
+                            input.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                        }
+                    }
+
+                    // Reset trạng thái hiển thị lỗi cũ trước khi kiểm tra lượt mới
+                    if (emailInput) clearInputError(emailInput);
+                    if (passwordInput) clearInputError(passwordInput);
+                    
+                    if (emailError) {
+                        emailError.textContent = "";
+                        emailError.style.display = "none";
+                    }
+
+                    // Biểu thức chính quy (Regex) kiểm tra cấu trúc Email tiêu chuẩn
+                    const emailRegex = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+                    // --- Kiểm tra ô Mật khẩu trống ---
+                    if (passwordInput && passwordInput.value.trim() === '') {
+                        hasError = true;
+                        setInputError(passwordInput);
+                        firstEmptyInput = passwordInput;
+                    }
+
+                    // --- Kiểm tra ô Email ---
+                    if (emailInput) {
+                        const emailValue = emailInput.value.trim();
+
+                        if (emailValue === '') {
+                            // Trường hợp trống hoàn toàn
+                            hasError = true;
+                            setInputError(emailInput);
+                            firstEmptyInput = emailInput;
+
+                            if (errorBox) {
+                                errorBox.textContent = "Vui lòng nhập đầy đủ địa chỉ Email và mật khẩu.";
+                                errorBox.className = "p-3 text-sm rounded-lg bg-red-100 text-red-700 border border-red-300 mb-6";
+                                errorBox.style.display = "block";
+                            }
+                        } else if (!emailRegex.test(emailValue)) {
+                            // Trường hợp có nhập nhưng sai định dạng định danh email
+                            hasError = true;
+                            setInputError(emailInput);
+                            firstEmptyInput = emailInput;
+
+                            // Hiển thị thông báo ngay bên dưới ô nhập dữ liệu của Email
+                            if (emailError) {
+                                emailError.textContent = "Địa chỉ Email không đúng định dạng (Ví dụ: abc@gmail.com). Vui lòng nhập lại!";
+                                emailError.style.display = "block";
+                            }
+
+                            // Ẩn thông báo tổng quát ở trên (nếu mật khẩu đã điền) để tránh lặp thông tin
+                            if (errorBox && (!passwordInput || passwordInput.value.trim() !== '')) {
+                                errorBox.style.display = "none";
+                            }
+                        }
+                    }
+
+                    // Nếu bất kỳ điều kiện nào lỗi -> chặn Form submit và Focus vào phần tử lỗi đầu tiên
+                    if (hasError) {
+                        e.preventDefault();
+                        if (firstEmptyInput) {
+                            firstEmptyInput.focus();
+                        }
+                    }
+                });
+            }
+
+            // --- XÓA TRẠNG THÁI BÁO LỖI TỨC THÌ KHI NGƯỜI DÙNG GÕ PHÍM ---
+            // Sử dụng cấu trúc an toàn để Razor Compiler không bắt nhầm mảng JavaScript
+            const inputIds = new Array('Email', 'Password');
+            for (let i = 0; i < inputIds.length; i++) {
+                const id = inputIds[i];
+                const inputElement = document.getElementById(id);
+                if (inputElement) {
+                    inputElement.addEventListener('input', function () {
+                        if (this.value.trim() !== '') {
+                            this.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+                            this.classList.add('border-gray-300', 'focus:ring-[#00bcd4]', 'focus:border-[#00bcd4]');
+
+                            // Riêng với Email, ẩn ngay thông báo nhỏ phía dưới khi người dùng sửa đổi text
+                            if (id === 'Email' && emailError) {
+                                emailError.style.display = "none";
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+
+    @await Html.PartialAsync("_ChatWidget")
+    <script src="~/assets/js/chatbot.js"></script>
+</body>
+
+</html>

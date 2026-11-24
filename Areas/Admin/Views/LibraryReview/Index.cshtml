@@ -1,0 +1,229 @@
+
+@model IEnumerable<LibraryHub.Models.tblLibraryReview>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Quản lý đánh giá thư viện";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Quản lý đánh giá thư viện</h2>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item active">Đánh giá thư viện</li>
+            </ol>
+        </nav>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3 mb-3">
+                            <h5 class="card-title mb-0">Danh sách đánh giá</h5>
+
+                            <a asp-area="Admin"
+                               asp-controller="LibraryReview"
+                               asp-action="Create"
+                               class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Thêm đánh giá
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">STT</th>
+                                        <th class="text-center">Ảnh</th>
+                                        <th>Người đánh giá</th>
+                                        <th class="text-center">Đánh giá</th>
+                                        <th>Nội dung</th>
+                                        <th class="text-center">Ngày tạo</th>
+                                        <th class="text-center">Duyệt</th>
+                                        <th class="text-center">Hiển thị</th>
+                                        <th class="text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @{
+                                        int stt = 0;
+                                    }
+
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            stt++;
+
+                                            <tr>
+                                                <td class="text-center">@stt</td>
+
+                                                <td class="text-center">
+                                                    @if (!string.IsNullOrWhiteSpace(item.Avatar))
+                                                    {
+                                                        <img src="@item.Avatar"
+                                                             alt="Ảnh @item.FullName"
+                                                             style="width:55px;height:55px;object-fit:cover;border-radius:50%;" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="d-flex justify-content-center align-items-center bg-light rounded-circle mx-auto"
+                                                             style="width:55px;height:55px;">
+                                                            <i class="bi bi-person-fill text-secondary fs-4"></i>
+                                                        </div>
+                                                    }
+                                                </td>
+
+                                                <td>
+                                                    <strong>@item.FullName</strong>
+
+                                                    @if (!string.IsNullOrWhiteSpace(item.ReviewerTitle))
+                                                    {
+                                                        <br />
+                                                        <small class="text-muted">@item.ReviewerTitle</small>
+                                                    }
+                                                </td>
+
+                                                <td class="text-center text-nowrap">
+                                                    <span class="text-warning">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            if (i <= item.Rating)
+                                                            {
+                                                                <i class="bi bi-star-fill"></i>
+                                                            }
+                                                            else
+                                                            {
+                                                                <i class="bi bi-star"></i>
+                                                            }
+                                                        }
+                                                    </span>
+                                                    <br />
+                                                    <small class="text-muted">@item.Rating/5</small>
+                                                </td>
+
+                                                <td style="min-width:220px;max-width:320px;">
+                                                    @{
+                                                        string content = item.ReviewContent ?? "";
+                                                        string shortContent = content.Length > 100
+                                                            ? content.Substring(0, 100) + "..."
+                                                            : content;
+                                                    }
+                                                    <span>@shortContent</span>
+                                                </td>
+
+                                                <td class="text-center text-nowrap">
+                                                    @item.CreateDate.ToString("dd/MM/yyyy")
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <form asp-area="Admin"
+                                                          asp-controller="LibraryReview"
+                                                          asp-action="ToggleApproval"
+                                                          method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.ReviewID" />
+
+                                                        <div class="form-check form-switch d-flex justify-content-center">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                   checked="@item.IsApproved"
+                                                                   onchange="this.form.submit()"
+                                                                   title="Duyệt hoặc hủy duyệt đánh giá" />
+                                                        </div>
+
+                                                        <small class="@(item.IsApproved ? "text-success" : "text-warning")">
+                                                            @(item.IsApproved ? "Đã duyệt" : "Chờ duyệt")
+                                                        </small>
+                                                    </form>
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <form asp-area="Admin"
+                                                          asp-controller="LibraryReview"
+                                                          asp-action="ToggleStatus"
+                                                          method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.ReviewID" />
+
+                                                        <div class="form-check form-switch d-flex justify-content-center">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                   checked="@item.IsActive"
+                                                                   onchange="this.form.submit()"
+                                                                   title="Bật hoặc tắt hiển thị" />
+                                                        </div>
+
+                                                        <small class="@(item.IsActive ? "text-success" : "text-secondary")">
+                                                            @(item.IsActive ? "Đang hiển thị" : "Đã ẩn")
+                                                        </small>
+                                                    </form>
+                                                </td>
+
+                                                <td class="text-center text-nowrap">
+                                                    <a asp-area="Admin"
+                                                       asp-controller="LibraryReview"
+                                                       asp-action="Edit"
+                                                       asp-route-id="@item.ReviewID"
+                                                       class="btn btn-primary btn-sm"
+                                                       title="Sửa đánh giá">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+
+                                                    <a asp-area="Admin"
+                                                       asp-controller="LibraryReview"
+                                                       asp-action="Delete"
+                                                       asp-route-id="@item.ReviewID"
+                                                       class="btn btn-danger btn-sm"
+                                                       title="Xóa đánh giá">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="9" class="text-center text-muted py-4">
+                                                <i class="bi bi-chat-square-text fs-3 d-block mb-2"></i>
+                                                Chưa có đánh giá thư viện nào.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

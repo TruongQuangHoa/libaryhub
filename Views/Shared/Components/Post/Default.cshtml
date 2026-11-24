@@ -1,0 +1,333 @@
+
+@using LibraryHub.Models
+@model IList<tblPost>
+
+<section id="recent-posts" class="recent-posts section">
+
+    <div class="container section-title">
+        <h2>Bài viết mới nhất</h2>
+        <p>Khám phá tin tức, hoạt động và những thông tin hữu ích từ thư viện</p>
+    </div>
+
+    <div class="container">
+        @if (Model != null && Model.Any())
+        {
+            <div class="post-grid">
+                @foreach (var post in Model)
+                {
+                    <article class="post-card">
+
+                        <div class="post-card-header">
+                            <div class="post-author">
+                                @if (!string.IsNullOrEmpty(post.AuthorAvatar))
+                                {
+                                    <img src="@post.AuthorAvatar"
+                                         alt="@post.AuthorName"
+                                         class="author-avatar" />
+                                }
+                                else
+                                {
+                                    <div class="author-avatar author-placeholder">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+                                }
+
+                                <div class="author-info">
+                                    <span class="author-name">
+                                        @(post.AuthorName ?? "Thư viện")
+                                    </span>
+                                    <small>
+                                        @(post.PublishedDate?.ToString("dd/MM/yyyy"))
+                                    </small>
+                                </div>
+                            </div>
+
+                            @if (post.IsFeatured)
+                            {
+                                <span class="post-featured">
+                                    <i class="bi bi-star-fill"></i>
+                                    Nổi bật
+                                </span>
+                            }
+                        </div>
+
+                        <a asp-controller="Post"
+                           asp-action="Details"
+                           asp-route-slug="@post.Slug"
+                           asp-route-id="@post.PostID"
+                           class="post-image-link">
+
+                            @if (!string.IsNullOrEmpty(post.Thumbnail))
+                            {
+                                <img src="@post.Thumbnail"
+                                     alt="@post.Title"
+                                     class="post-thumbnail"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="post-no-image">
+                                    <i class="bi bi-journal-richtext"></i>
+                                </div>
+                            }
+                        </a>
+
+                        <div class="post-card-body">
+
+                            @if (!string.IsNullOrEmpty(post.Category))
+                            {
+                                <span class="post-category">
+                                    @post.Category
+                                </span>
+                            }
+
+                            <h3>
+                                <a asp-controller="Post"
+                                   asp-action="Details"
+                                   asp-route-slug="@post.Slug"
+                                   asp-route-id="@post.PostID">
+                                    @post.Title
+                                </a>
+                            </h3>
+
+                            <p class="post-summary">
+                                @(post.Summary ?? "")
+                            </p>
+
+                            <div class="post-card-footer">
+                                <span>
+                                    <i class="bi bi-eye"></i>
+                                    @post.ViewCount lượt xem
+                                </span>
+
+                                <a asp-controller="Post"
+                                   asp-action="Details"
+                                   asp-route-slug="@post.Slug"
+                                   asp-route-id="@post.PostID">
+                                    Đọc bài viết
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="post-empty">
+                <i class="bi bi-journal-x"></i>
+                <h3>Chưa có bài viết nào</h3>
+                <p>Các bài viết mới sẽ được cập nhật tại đây.</p>
+            </div>
+        }
+    </div>
+</section>
+
+<style>
+    .recent-posts {
+        padding: 65px 0;
+        background: #fff;
+    }
+
+    .recent-posts .section-title {
+        text-align: center;
+        margin-bottom: 45px;
+    }
+
+    .recent-posts .section-title h2 {
+        color: #243c5a;
+        font-size: 34px;
+        font-weight: 750;
+    }
+
+    .recent-posts .section-title p {
+        color: #748094;
+        margin-top: 12px;
+    }
+
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+    }
+
+    .post-card {
+        min-width: 0;
+        overflow: hidden;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 5px 28px rgba(31, 49, 75, .09);
+        transition: transform .3s ease, box-shadow .3s ease;
+    }
+
+    .post-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 35px rgba(31, 49, 75, .14);
+    }
+
+    .post-card-header {
+        min-height: 80px;
+        padding: 15px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .post-author {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .author-avatar {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .author-placeholder {
+        display: grid;
+        place-items: center;
+        background: #edf3fa;
+        color: #315c8c;
+        font-size: 22px;
+    }
+
+    .author-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .author-name {
+        color: #344b69;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .author-info small {
+        color: #929baa;
+        font-size: 12px;
+    }
+
+    .post-featured {
+        color: #bd8a36;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .post-image-link {
+        display: block;
+        overflow: hidden;
+        height: 250px;
+        background: #f1f4f8;
+    }
+
+    .post-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .5s ease;
+    }
+
+    .post-card:hover .post-thumbnail {
+        transform: scale(1.06);
+    }
+
+    .post-no-image {
+        width: 100%;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        color: #8da2ba;
+        font-size: 55px;
+    }
+
+    .post-card-body {
+        padding: 24px 26px 20px;
+    }
+
+    .post-category {
+        display: inline-block;
+        margin-bottom: 10px;
+        color: #2563a5;
+        background: #edf5ff;
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .post-card-body h3 {
+        margin-bottom: 12px;
+        font-size: 21px;
+        line-height: 1.35;
+        font-weight: 700;
+    }
+
+    .post-card-body h3 a {
+        color: #263f60;
+        text-decoration: none;
+        transition: color .2s;
+    }
+
+    .post-card-body h3 a:hover {
+        color: #2673c7;
+    }
+
+    .post-summary {
+        color: #778292;
+        font-size: 14px;
+        line-height: 1.75;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 73px;
+    }
+
+    .post-card-footer {
+        border-top: 1px solid #edf0f4;
+        margin-top: 18px;
+        padding-top: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+    }
+
+    .post-card-footer span {
+        color: #8b96a5;
+    }
+
+    .post-card-footer a {
+        color: #2673c7;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .post-empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: #8290a2;
+    }
+
+    .post-empty i {
+        font-size: 55px;
+    }
+
+    .post-empty h3 {
+        color: #344b69;
+        margin-top: 15px;
+    }
+
+</style>

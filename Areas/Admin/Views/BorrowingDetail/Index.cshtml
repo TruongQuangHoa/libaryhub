@@ -1,0 +1,89 @@
+@using LibraryHub.Models
+@model IList<tblBorrowingDetail>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách chi tiết phiếu mượn</h2>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body mt-4">
+                        <table class="table table-borderless datatable">
+                            <thead>
+                                <tr>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-1 text-center">Mã phiếu mượn</th>
+                                    <th class="col-2 text-center">Độc giả</th>
+                                    <th class="col-3 text-center">Tên sách</th>
+                                    <th class="col-2 text-center">Phí mượn sách</th>
+                                    <th class="col-1 text-center">Hiển thị</th>
+                                    <th class="col-2 text-center">Chức năng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int stt = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    stt++;
+                                    <tr>
+                                        <td class="text-center">@stt</td>
+                                        <td class="text-center">@item.BorrowingID</td>
+                                        <td class="text-center text-primary">
+                                            @(item.borrowing?.patron?.PatronName ?? "Không xác định")
+                                        </td>
+                                        <td class="text-center">
+                                            @(item.book != null
+                                                                                    ? $"{item.book.TitleBook} | Thể loại: {item.book.category?.CategoryName ??
+                                                                                    "N/A"}"
+                                                                                    : "Sách không tồn tại")
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-warning">@item.BorrowingFee.ToString("N0") VNĐ</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge @(item.IsActive ? "bg-primary" : "bg-success")">
+                                                @(item.IsActive ? "Đang mượn" : "Đã trả")
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.IsActive)
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.BorrowingDetailID"
+                                                    class="btn btn-primary btn-sm" title="Chỉnh sửa chi tiết phiếu mượn">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.BorrowingDetailID"
+                                                    class="btn btn-danger btn-sm ms-1" title="Xóa chi tiết phiếu mượn"
+                                                    onclick="return confirm('Bạn có chắc muốn xóa chi tiết phiếu mượn này?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-secondary btn-sm" disabled>
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm" disabled>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

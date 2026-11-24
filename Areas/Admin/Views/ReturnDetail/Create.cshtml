@@ -1,0 +1,138 @@
+@model LibraryHub.Models.tblReturnDetail
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Nhập Chi Tiết Sách Trả</h5>
+
+            <form asp-action="Create" method="post">
+                <div class="form-group mb-3">
+                    <label class="form-label">Chọn Phiếu Trả (*)</label>
+                    @Html.DropDownList("ReturnID", (SelectList)ViewBag.ReturnID, "-- Chọn phiếu trả --",
+                    new { @class = "form-control", @id = "ddlReturn", required = "required" })
+                </div>
+
+                <hr />
+
+                <div id="bookListContainer" style="display:none;">
+                    <h5 class="mt-3">Danh sách sách cần trả</h5>
+                    <table class="table table-bordered table-hover" id="tblBooks">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="35%">Tên sách</th>
+                                <th width="12%" class="text-center">Hỏng/Mất?</th>
+                                <th width="12%">Số ngày quá hạn</th>
+                                <th width="12%">Phí quá hạn (VNĐ)</th>
+                                <th width="12%">Phí hỏng/mất (VNĐ)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookTableBody">
+                            <!-- JS sẽ fill -->
+                        </tbody>
+                    </table>
+                </div>
+                <a asp-controller="ReturnDetail" asp-action="Index" 
+                    class="btn btn-lg btn-warning p-2">
+                    <i class="bi bi-arrow-left-circle"></i>
+                    Quay lại
+                </a>
+
+                <button type="submit" class="btn btn-lg btn-success p-2">
+                    <i class="bi bi-box-arrow-in-down"></i> Lưu thông tin
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#ddlReturn').change(function () {
+                var returnId = $(this).val();
+
+                if (returnId) {
+                    var url = '@Url.Action("GetBooksByReturn", "ReturnDetail", new { area = "Admin" })';
+
+                    $.getJSON(url, { returnId: returnId }, function (data) {
+                        if (data.length === 0) {
+                            alert("Phiếu trả này chưa có sách nào hoặc phiếu mượn gốc không có sách.");
+                            $('#bookTableBody').html('');
+                            $('#bookListContainer').hide();
+                            return;
+                        }
+
+                        var rows = '';
+                        $.each(data, function (index, book) {
+                            var isChecked = book.isDamaged ? 'checked' : '';
+                            var lostFineReadonly = book.isDamaged ? '' : 'readonly';
+                            var lostFineValue = book.isDamaged ? book.lostFine : 0;
+
+                            rows += `
+                                                <tr>
+                                                    <td>
+                                                        ${book.titleBook}
+                                                        <input type="hidden" name="details[${index}].BookID" value="${book.bookID}" />
+                                                        <input type="hidden" name="details[${index}].ReturnID" value="${returnId}" />
+                                                    </td>
+                                                    // Thay đổi đoạn render Checkbox trong biến rows
+                                                    <td class="text-center">
+                                                        <input type="checkbox" 
+                                                            class="form-check-input chk-damaged" 
+                                                            data-index="${index}" ${isChecked} 
+                                                            value="true" /> <input type="hidden" 
+                                                            name="details[${index}].IsDamaged" 
+                                                            id="hdnDamaged_${index}" 
+                                                            value="${book.isDamaged ? 'true' : 'false'}" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <input type="text" class="form-control" value="${book.overdueDays}" readonly />
+                                                        <input type="hidden" name="details[${index}].OverdueDays" value="${book.overdueDays}" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control" value="${book.overdueFine}" readonly />
+                                                        <input type="hidden" name="details[${index}].OverdueFine" value="${book.overdueFine}" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" 
+                                                               name="details[${index}].LostFine" 
+                                                               class="form-control lost-fine" 
+                                                               value="${lostFineValue}" 
+                                                               min="0" 
+                                                               ${lostFineReadonly} />
+                                                    </td>
+                                                </tr>`;
+                        });
+
+                        $('#bookTableBody').html(rows);
+                        $('#bookListContainer').show();
+                    }).fail(function () {
+                        alert("Không thể tải danh sách sách.");
+                    });
+                } else {
+                    $('#bookTableBody').html('');
+                    $('#bookListContainer').hide();
+                }
+            });
+
+            // Khi tick "Hỏng/Mất" → cho phép nhập phí
+            $(document).on('change', '.chk-damaged', function () {
+                var index = $(this).data('index');
+                var $lostFineInput = $(`input[name="details[${index}].LostFine"]`);
+                var $hiddenInput = $(`#hdnDamaged_${index}`); // Tìm thẻ hidden tương ứng
+
+                if ($(this).is(':checked')) {
+                    $lostFineInput.removeAttr('readonly').val(100000);
+                    $hiddenInput.val("true"); // Cập nhật hidden thành true
+                } else {
+                    $lostFineInput.attr('readonly', 'readonly').val(0);
+                    $hiddenInput.val("false"); // Cập nhật hidden thành false
+                }
+            });
+        });
+    </script>
+}

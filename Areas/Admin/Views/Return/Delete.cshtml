@@ -1,0 +1,69 @@
+@model LibraryHub.Models.tblReturn
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Xóa thông tin phiếu trả</h2>
+    </div>
+    <div class="card shadow p-4">
+        <h3>Thông tin chi tiết</h3>
+        <div class="form-row row">
+            <div class="form-group col-md-4 mb-3">
+                <label><strong>Mã phiếu trả</strong></label>
+                <input type="text" class="form-control" value="@Model.ReturnID" disabled />
+            </div>
+            <div class="form-group col-md-4 mb-3">
+                <label><strong>Ngày trả</strong></label>
+                <input type="text" class="form-control" value="@(Model.ReturnDate?.ToString("dd/MM/yyyy") ?? "N/A")" disabled />
+            </div>
+            <div class="form-group col-md-4 mb-3">
+                <label><strong>Thủ thư nhận</strong></label>
+                <input type="text" class="form-control" value="@(Model.librarian?.FullName ?? "N/A")" disabled />
+            </div>
+            <div class="form-group col-md-6 mb-3">
+                <label><strong>Phiếu mượn gốc</strong></label>
+                <input type="text" class="form-control" value="@Model.BorrowingID - Độc giả: @(Model.borrowing?.patron?.PatronName ?? "N/A")" disabled />
+            </div>
+             <div class="form-group col-md-6 mb-3">
+                <label><strong>Tổng phí phạt</strong></label>
+                <input type="text" class="form-control text-danger font-weight-bold" value="@(Model.TotalFine.ToString("N0")) VNĐ" disabled />
+            </div>
+        </div>
+        
+        <h4 class="mt-3">Sách đã trả trong phiếu này</h4>
+        @if (Model.returnDetail != null && Model.returnDetail.Any())
+        {
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Tên sách</th>
+                        <th>Phí quá hạn</th>
+                        <th>Phí hỏng/mất</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var detail in Model.returnDetail)
+                    {
+                        <tr>
+                            <td>@(detail.book?.TitleBook ?? "N/A")</td>
+                            <td>@detail.OverdueFine.ToString("N0") VNĐ (@detail.OverdueDays ngày)</td>
+                            <td>@detail.LostFine.ToString("N0") VNĐ (@(detail.IsDamaged ? "Bị hỏng" : "Bình thường"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <form asp-action="Delete" method="Post" class="mt-4">
+        <input type="hidden" asp-for="ReturnID" />
+        <a class="btn btn-lg btn-warning p-2 mr-5" href="javascript:history.back()">
+            <i class="bi bi-arrow-left-circle"></i> Quay lại
+        </a>
+        <button type="submit" class="btn btn-lg btn-danger p-2">
+            <i class="bi bi-trash"></i> Xác nhận Xóa
+        </button>
+    </form>
+    </main>

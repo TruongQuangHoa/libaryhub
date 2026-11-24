@@ -1,0 +1,220 @@
+
+@model LibraryHub.Models.tblPublisher
+
+@{
+    ViewData["Title"] = "Xóa nhà xuất bản";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h2>Xóa nhà xuất bản</h2>
+
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">
+                        Trang chủ
+                    </a>
+                </li>
+
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin"
+                       asp-controller="Publisher"
+                       asp-action="Index">
+                        Nhà xuất bản
+                    </a>
+                </li>
+
+                <li class="breadcrumb-item active">
+                    Xóa nhà xuất bản
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-10">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5 class="card-title text-danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Xác nhận xóa nhà xuất bản
+                        </h5>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle me-1"></i>
+
+                            Bạn có chắc chắn muốn xóa nhà xuất bản này không?
+
+                            Các tác giả đang liên kết với nhà xuất bản sẽ
+                            được giữ lại nhưng không còn nhà xuất bản liên kết.
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-bordered">
+
+                                <tbody>
+
+                                    <tr>
+                                        <th style="width: 30%">
+                                            Mã nhà xuất bản
+                                        </th>
+                                        <td>
+                                            @Model.PublisherID
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Tên nhà xuất bản
+                                        </th>
+                                        <td>
+                                            <strong>@Model.PublisherName</strong>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Mô tả
+                                        </th>
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(Model.Description)
+                                                ? "Chưa cập nhật"
+                                                : Model.Description)
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Địa chỉ
+                                        </th>
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(Model.Address)
+                                                ? "Chưa cập nhật"
+                                                : Model.Address)
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Số điện thoại
+                                        </th>
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(Model.Phone)
+                                                ? "Chưa cập nhật"
+                                                : Model.Phone)
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Email
+                                        </th>
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(Model.Email)
+                                                ? "Chưa cập nhật"
+                                                : Model.Email)
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Website
+                                        </th>
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(Model.Website)
+                                                ? "Chưa cập nhật"
+                                                : Model.Website)
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Trạng thái
+                                        </th>
+                                        <td>
+                                            @if (Model.IsActive)
+                                            {
+                                                <span class="badge bg-success">
+                                                    Hoạt động
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    Ngừng hoạt động
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Ngày tạo
+                                        </th>
+                                        <td>
+                                            @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <th>
+                                            Ngày cập nhật
+                                        </th>
+                                        <td>
+                                            @Model.ModifiedDate.ToString("dd/MM/yyyy HH:mm")
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        <form asp-area="Admin"
+                              asp-controller="Publisher"
+                              asp-action="Delete"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@Model.PublisherID" />
+
+                            <div class="d-flex gap-2 mt-3">
+
+                                <button type="submit"
+                                        class="btn btn-danger"
+                                        onclick="return confirm('Bạn có chắc chắn muốn xóa nhà xuất bản này không?');">
+                                    <i class="bi bi-trash"></i>
+                                    Xác nhận xóa
+                                </button>
+
+                                <a asp-area="Admin"
+                                   asp-controller="Publisher"
+                                   asp-action="Index"
+                                   class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i>
+                                    Hủy bỏ
+                                </a>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main>

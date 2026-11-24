@@ -1,0 +1,438 @@
+@model LibraryHub.Models.tblUsers
+@using LibraryHub.Utilities
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - LibraryHub</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <!-- Favicons -->
+    <link href="~/assets/img/favicon.png" rel="icon">
+    <link href="~/assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+    <link href="~/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="~/assets/css/chatbot.css" rel="stylesheet">
+
+    <style>
+            :root {
+                --primary-color: #3498db;
+                --secondary-color: #2ecc71;
+                --background-color: #f4f6f9;
+                --text-color: #333;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background-color: var(--background-color);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .login-container {
+                width: 100%;
+                max-width: 900px;
+                background-color: white;
+                border-radius: 12px;
+                overflow: hidden;
+                display: flex;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .login-left {
+                width: 40%;
+                background-color: var(--primary-color);
+                color: white;
+                padding: 40px 30px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .logo-container h1 {
+                margin-top: 15px;
+                font-size: 26px;
+            }
+
+            .illustration svg {
+                width: 120px;
+                height: 120px;
+                stroke: white;
+                margin-top: 20px;
+            }
+
+            .slogan h2 {
+                font-size: 18px;
+                margin-top: 20px;
+                line-height: 1.4;
+            }
+
+            .login-right {
+                width: 60%;
+                padding: 40px 30px;
+            }
+
+            .login-form h2 {
+                color: var(--primary-color);
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .welcome-message {
+                text-align: center;
+                margin-bottom: 25px;
+                color: #666;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .form-label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 5px;
+                color: var(--text-color);
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 14px;
+                transition: border-color 0.3s, box-shadow 0.3s;
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--primary-color);
+            }
+
+            .form-check {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .form-check-label a {
+                color: var(--primary-color);
+                text-decoration: none;
+            }
+
+            .btn-primary {
+                background-color: var(--primary-color);
+                border: none;
+                color: white;
+                padding: 12px;
+                width: 100%;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .btn-primary:hover {
+                background-color: #2980b9;
+            }
+
+            .text-danger {
+                color: red;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .mb-0 {
+                margin-bottom: 0;
+            }
+
+            /* --- VÙNG THÔNG BÁO LỖI TỔNG QUÁT --- */
+            .error-message {
+                margin-top: 15px;
+                margin-bottom: 15px;
+            }
+
+            .error-message h4 {
+                font-size: 15px;
+                color: red;
+                font-weight: bold;
+            }
+
+            /* --- ĐƯỜNG VIỀN ĐỎ CHO INPUT KHI CÓ LỖI --- */
+            .form-control.is-invalid {
+                border-color: red !important;
+                box-shadow: 0 0 3px rgba(255, 0, 0, 0.2);
+            }
+
+            /* Đường viền đỏ cho Checkbox điều khoản */
+            .form-check-input.is-invalid {
+                outline: 2px solid red;
+            }
+
+            /* Nhãn báo lỗi định dạng riêng cho Email */
+            .email-error {
+                color: red;
+                font-size: 13px;
+                margin-top: 4px;
+                display: none;
+            }
+
+            /* Style bọc ngoài để định vị icon */
+            .password-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+            /* Đẩy ô input chiếm hết chiều ngang và nhường khoảng trống bên phải cho icon */
+            .password-wrapper .form-control {
+                padding-right: 40px;
+                /* Tránh chữ bị đè lên icon khi gõ dài */
+            }
+
+            /* Căn giữa icon con mắt theo chiều dọc ở góc phải */
+            .toggle-password {
+                position: absolute;
+                right: 15px;
+                cursor: pointer;
+                color: #666;
+                font-size: 16px;
+                z-index: 10;
+                transition: color 0.3s;
+            }
+
+            .toggle-password:hover {
+                color: var(--primary-color);
+            }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="logo-container text-center">
+                <h1>LibraryHub</h1>
+                <p>Thư viện tri thức</p>
+            </div>
+            <div class="illustration text-center">
+                <img src="~/assets/img/logo-login-logout.png" alt="LibraryHub">
+                <div class="slogan">
+                    <h2>Khám phá tri thức,<br />mở rộng tầm nhìn</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-right">
+            <div class="login-form">
+                <h2>Đăng ký</h2>
+                <p class="welcome-message">Chào mừng đến với LibraryHub! Vui lòng tạo tài khoản.</p>
+
+                <form asp-controller="Register" asp-action="Index" method="post" id="registerForm" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group">
+                        <label for="yourName" class="form-label">Tên đăng nhập</label>
+                        <input type="text" class="form-control" id="yourName" name="UserName" asp-for="UserName"
+                               value="@(Model?.UserName)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="yourEmail" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="yourEmail" name="Email" asp-for="Email"
+                               value="@(Model?.Email)">
+                        <span id="emailFormatError" class="email-error">Email không đúng định dạng (Ví dụ:
+                            abc@gmail.com)</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="yourPassword" class="form-label">Mật khẩu</label>
+                            <div class="password-wrapper">
+                                <input type="password" class="form-control" id="yourPassword" name="Password"
+                                       asp-for="Password" value="@(Model?.Password)">
+                                <i class="far fa-eye toggle-password" id="togglePasswordIcon"></i>
+                            </div>
+                        </div>
+
+                        <input asp-for="IsActive" type="hidden" value="true" />
+
+                        <div id="generalErrorMessage" class="error-message text-center text-danger"
+                             style="display: @(TempData["ErrorMessage"] != null ? "block" : "none");">
+                            <h4 id="errorText">@TempData["ErrorMessage"]</h4>
+                        </div>
+
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="acceptTerms">
+                            <label class="form-check-label" for="acceptTerms">
+                                Tôi đồng ý với <a href="#">các điều khoản</a> và <a href="#">điều kiện</a> của hệ thống
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Tạo tài khoản</button>
+
+                        <div class="col-12">
+                            <p class="text-center mb-0" style="font-size: 16px; margin-top: 24px;">
+                                Bạn đã có tài khoản?
+                                <a href="/Login"
+                                   style="color: var(--secondary-color); font-weight: 600; font-size: 17px; text-decoration: none;">Đăng
+                                    nhập</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                    document.getElementById('registerForm').addEventListener('submit', function (event) {
+                        const nameInput = document.getElementById('yourName');
+                        const emailInput = document.getElementById('yourEmail');
+                        const passwordInput = document.getElementById('yourPassword');
+                        const acceptTerms = document.getElementById('acceptTerms');
+                        const emailFormatError = document.getElementById('emailFormatError');
+
+                        // Khối thông báo lỗi tổng quát
+                        const generalErrorDiv = document.getElementById('generalErrorMessage');
+                        const errorText = document.getElementById('errorText');
+
+                        const emailPattern = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+                        let hasEmptyField = false;
+                        let hasFormatError = false;
+                        let firstInvalidElement = null;
+
+                        // 1. Kiểm tra Tên đăng nhập trống
+                        if (nameInput.value.trim() === "") {
+                            nameInput.classList.add('is-invalid');
+                            hasEmptyField = true;
+                            if (!firstInvalidElement) firstInvalidElement = nameInput;
+                        } else {
+                            nameInput.classList.remove('is-invalid');
+                        }
+
+                        // 2. Kiểm tra Email trống & Định dạng Email
+                        if (emailInput.value.trim() === "") {
+                            emailInput.classList.add('is-invalid');
+                            emailFormatError.style.display = 'none';
+                            hasEmptyField = true;
+                            if (!firstInvalidElement) firstInvalidElement = emailInput;
+                        } else if (!emailPattern.test(emailInput.value.trim())) {
+                            emailInput.classList.add('is-invalid');
+                            emailFormatError.style.display = 'block';
+                            hasFormatError = true;
+                            if (!firstInvalidElement) firstInvalidElement = emailInput;
+                        } else {
+                            emailInput.classList.remove('is-invalid');
+                            emailFormatError.style.display = 'none';
+                        }
+
+                        // 3. Kiểm tra Mật khẩu trống
+                        if (passwordInput.value.trim() === "") {
+                            passwordInput.classList.add('is-invalid');
+                            hasEmptyField = true;
+                            if (!firstInvalidElement) firstInvalidElement = passwordInput;
+                        } else {
+                            passwordInput.classList.remove('is-invalid');
+                        }
+
+                        // 4. Kiểm tra Checkbox điều khoản
+                        if (!acceptTerms.checked) {
+                            acceptTerms.classList.add('is-invalid');
+                            if (!firstInvalidElement) firstInvalidElement = acceptTerms;
+                        } else {
+                            acceptTerms.classList.remove('is-invalid');
+                        }
+
+                        // --- XỬ LÝ ĐIỀU HƯỚNG VÀ HIỂN THỊ CHỮ CẢNH BÁO ---
+                        if (firstInvalidElement) {
+                            // Chặn form gửi dữ liệu lên Server
+                            event.preventDefault();
+
+                            // Di chuyển con trỏ chuột tập trung vào ô lỗi đầu tiên
+                            firstInvalidElement.focus();
+
+                            // Nếu có bất kỳ ô nào ở trên chưa nhập, hiển thị thông báo text giống ảnh 2
+                            if (hasEmptyField) {
+                                errorText.innerText = "Vui lòng nhập đầy đủ thông tin đăng ký!";
+                                generalErrorDiv.style.display = "block";
+                            } else if (hasFormatError && !hasEmptyField) {
+                                // Nếu nhập đủ rồi nhưng chỉ có duy nhất lỗi định dạng Email
+                                errorText.innerText = "Địa chỉ email không đúng định dạng!";
+                                generalErrorDiv.style.display = "block";
+                            }
+                        }
+                    });
+
+                    // Thêm đoạn này vào bên trong thẻ <script>, nằm ngoài sự kiện 'submit' của form nhé
+                    const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+                    const passwordInput = document.getElementById('yourPassword');
+
+                    togglePasswordIcon.addEventListener('click', function () {
+                        // Kiểm tra kiểu hiện tại của input
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+
+                        // Thay đổi biểu tượng icon tương ứng (Mắt mở / Mắt đóng)
+                        // Nếu bạn dùng Font Awesome v5/v6, có thể toggle qua lại giữa fa-eye và fa-eye-slash
+                        this.classList.toggle('fa-eye');
+                        this.classList.toggle('fa-eye-slash');
+                    });
+
+                    // --- XÓA VIỀN ĐỎ VÀ ẨN CHỮ BÁO LỖI KHI NGƯỜI DÙNG BẮT ĐẦU GÕ LẠI ---
+                    function clearGeneralError() {
+                        const nameInput = document.getElementById('yourName');
+                        const emailInput = document.getElementById('yourEmail');
+                        const passwordInput = document.getElementById('yourPassword');
+
+                        // Nếu các ô dữ liệu chính đều không còn bị trống viền đỏ, ẩn luôn dòng chữ báo lỗi đi
+                        if (nameInput.value.trim() !== "" && emailInput.value.trim() !== "" && passwordInput.value.trim() !== "") {
+                            document.getElementById('generalErrorMessage').style.display = "none";
+                        }
+                    }
+
+                    document.getElementById('yourName').addEventListener('input', function () {
+                        this.classList.remove('is-invalid');
+                        clearGeneralError();
+                    });
+
+                    document.getElementById('yourEmail').addEventListener('input', function () {
+                        this.classList.remove('is-invalid');
+                        document.getElementById('emailFormatError').style.display = 'none';
+                        clearGeneralError();
+                    });
+
+                    document.getElementById('yourPassword').addEventListener('input', function () {
+                        this.classList.remove('is-invalid');
+                        clearGeneralError();
+                    });
+
+                    document.getElementById('acceptTerms').addEventListener('change', function () {
+                        if (this.checked) {
+                            this.classList.remove('is-invalid');
+                        }
+                    });
+            </script>
+
+            @await Html.PartialAsync("_ChatWidget")
+            <script src="~/assets/js/chatbot.js"></script>
+        </body>
+
+    </html>

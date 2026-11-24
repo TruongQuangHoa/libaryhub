@@ -1,0 +1,249 @@
+@using LibraryHub.Models;
+
+@model IList<tblLibrarian>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewBag.Title = "Quản lý Thủ thư";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách thủ thư</h2>
+
+        <p>
+            <section class="section dashboard">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card recent-sales overflow-auto">
+                            <div class="card-body mt-4">
+                                
+                                <!-- Khu vực nhập thủ thư từ Excel -->
+                                <div class="mb-3">
+
+                                    <form asp-area="Admin" asp-controller="Librarian" asp-action="ImportExcel" method="post"
+                                          enctype="multipart/form-data">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <!-- Hàng 1: Chọn file Excel -->
+                                        <div class="mb-2">
+                                            <input type="file" name="excelFile" class="form-control" accept=".xlsx" required
+                                                   style="max-width: 350px;" />
+                                        </div>
+
+                                        <!-- Hàng 2: Các nút chức năng -->
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                                            <!-- Nút nhập Excel -->
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-file-earmark-excel me-1"></i>
+                                                Nhập thủ thư từ Excel
+                                            </button>
+
+                                            <!-- Nút tải file Excel mẫu -->
+                                            <a asp-area="Admin" asp-controller="Librarian"
+                                               asp-action="DownloadExcelTemplate" class="btn btn-primary">
+                                                <i class="bi bi-download me-1"></i>
+                                                Tải file Excel mẫu
+                                            </a>
+
+                                        </div>
+
+                                    </form>
+                                </div>
+
+                                <!-- Thông báo kết quả nhập -->
+                                @if (TempData["ImportSuccess"] != null)
+                                {
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        @TempData["ImportSuccess"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Đóng"></button>
+                                    </div>
+                                }
+
+                                @if (TempData["ImportError"] != null)
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        @TempData["ImportError"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                aria-label="Đóng"></button>
+                                    </div>
+                                }
+
+                                @if (TempData["ImportDetails"] != null)
+                                {
+                                    <div class="alert alert-warning" role="alert">
+                                        <strong>Chi tiết lỗi:</strong>
+                                        <pre class="mb-0 mt-2 text-wrap">@TempData["ImportDetails"]</pre>
+                                    </div>
+                                }
+
+                                <table class="table table-borderless datatable">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-1 text-center">STT</th>
+                                            <th class="text-center">Ảnh</th>
+                                            <th class="col-1 text-center">Họ và tên</th>
+                                            <th class="text-center">Email</th>
+                                            <th class="col-1 text-center">Ngày sinh</th>
+                                            <th class="col-1 text-center">Giới tính</th>
+                                            <th class="col-1 text-center">Địa chỉ</th>
+                                            <th class="col-1 text-center">Tình trạng thủ thư</th>
+                                            <th class="col-1 text-center">SĐT</th>
+                                            <th class="col-1 text-center">Hiển thị</th>
+                                            <th class="col-1 text-center">Chức năng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int stt = 0;
+                                        }
+                                        @foreach (var item in Model)
+                                        {
+                                            stt++;
+                                            bool isSystemLibrarian = string.Equals(
+                                                item.FullName?.Trim(),
+                                                    "Librarian Online",
+                                                    StringComparison.OrdinalIgnoreCase
+                                                );
+                                            <tr>
+                                                <td class="text-center" scope="row">@stt</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(item.Images))
+                                                    {
+                                                        <img src="@item.Images" alt="Ảnh @item.FullName" style="
+                                                        width:60px;
+                                                        height:60px;
+                                                        object-fit:cover;
+                                                        border-radius:50%;
+                                                        border:1px solid #ddd;
+                                                        " />
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">
+                                                            Chưa có ảnh
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td class="text-left text-primary text-center" scope="row">@item.FullName</td>
+                                                <td class="text-center">
+                                                    @if (!string.IsNullOrEmpty(item.Email))
+                                                    {
+                                                        <a href="mailto:@item.Email">
+                                                            @item.Email
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Chưa có Email</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center" scope="row">@item.Birth?.ToString("dd/MM/yyyy")</td>
+                                                <td class="text-center" scope="row">@item.Gender</td>
+                                                <td class="text-center" scope="row">@item.Address</td>
+                                                <td class="text-center" scope="row">@item.StatusLibrarian</td>
+                                                <td class="text-center" scope="row">@item.NumberPhone</td>
+                                                
+                                                <td class="text-center">
+                                                    @if (isSystemLibrarian)
+                                                    {
+                                                        <!-- Librarian Online luôn hoạt động, không cho bật/tắt -->
+                                                        <div class="form-check form-switch d-flex justify-content-center">
+                                                            <input class="form-check-input" type="checkbox" checked disabled
+                                                                   title="Librarian Online luôn được duy trì hoạt động" />
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <!-- Thủ thư thông thường được phép bật/tắt -->
+                                                        <form asp-area="Admin" asp-controller="Librarian" asp-action="ToggleStatus"
+                                                              method="post">
+
+                                                            @Html.AntiForgeryToken()
+
+                                                            <input type="hidden" name="id" value="@item.LibrarianID" />
+
+                                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                                <input class="form-check-input toggle-status-switch" type="checkbox"
+                                                                       name="IsActive" @(item.IsActive ? "checked" : "")
+                                                                       onchange="this.form.submit()" />
+                                                            </div>
+                                                        </form>
+                                                    }
+                                                </td>
+
+                                                
+                                                <td class="text-center" scope="row">
+                                                    @if (isSystemLibrarian)
+                                                    {
+                                                        <!-- Không cho phép chỉnh sửa Librarian Online -->
+                                                        <button type="button" class="btn btn-secondary btn-sm"
+                                                                title="Không thể chỉnh sửa thủ thư hệ thống" disabled>
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+
+                                                        <!-- Không cho phép xóa Librarian Online -->
+                                                        <button type="button" class="btn btn-secondary btn-sm"
+                                                                title="Không thể xóa thủ thư hệ thống" disabled>
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a asp-area="Admin" asp-controller="Librarian" asp-action="Edit"
+                                                           asp-route-id="@item.LibrarianID" class="btn btn-primary btn-sm"
+                                                           title="Chỉnh sửa thủ thư">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+
+                                                        <a asp-area="Admin" asp-controller="Librarian" asp-action="Delete"
+                                                           asp-route-id="@item.LibrarianID" class="btn btn-danger btn-sm"
+                                                           title="Xóa thủ thư">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    }
+                                                </td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </p>
+    </div>
+</main>
+
+
+<script>
+    document.getElementById('btn-Upload').addEventListener('click', function () {
+        const fileInput = document.getElementById('file-input');
+        fileInput.click();
+        fileInput.addEventListener('change', function () {
+            if (fileInput.files.length > 0) {
+                fileInput.closest('form').submit();
+            }
+        });
+    });
+
+    // JavaScript để xử lý lọc khi chọn lớp
+    document.getElementById('classFilterDropdown').addEventListener('change', function () {
+        document.getElementById('filterForm').submit();
+    });
+
+    // JavaScript để xử lý nút "Tải Excel lớp đã chọn"
+    document.getElementById('exportByClassForm').addEventListener('submit', function (event) {
+        var selectedClassId = document.getElementById('classFilterDropdown').value;
+        if (selectedClassId === "" || selectedClassId === "0") { // Kiểm tra nếu không có lớp nào được chọn
+            alert("Vui lòng chọn một lớp cụ thể để tải Excel theo lớp.");
+            event.preventDefault(); // Ngăn chặn form gửi đi
+        } else {
+            document.getElementById('selectedClassIdForExport').value = selectedClassId;
+        }
+    });
+
+</script>

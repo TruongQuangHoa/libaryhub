@@ -1,0 +1,805 @@
+@using LibraryHub.Models
+@model tblReturn
+@{
+    ViewData["Title"] = $"Chi tiết phiếu trả #{Model.ReturnID}";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var paymentHistories = ViewBag.PaymentHistories as List<tblPaymentHistory> ?? new List<tblPaymentHistory>();
+    var latestPayment = paymentHistories.FirstOrDefault(p => p.PaymentStatus == "Đã thanh toán" || p.PaymentStatus == "Thu dư");
+    bool isPaid = latestPayment != null;
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Chi tiết phiếu trả #@Model.ReturnID</h2>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body pt-4">
+                        <h5 class="card-title pt-0">Thông tin phiếu trả</h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Mã phiếu trả</label>
+                                <input type="text" class="form-control" value="@Model.ReturnID" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Mã phiếu mượn gốc</label>
+                                <input type="text" class="form-control" value="@Model.BorrowingID" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Trạng thái</label>
+                                <div>
+                                    @if (isPaid)
+                                    {
+                                        <span id="returnStatusBadge" class="badge bg-success fs-6">Đã hoàn tất</span>
+                                    }
+                                    else
+                                    {
+                                        <span id="returnStatusBadge" class="badge bg-danger fs-6">Chưa hoàn tất</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Độc giả</label>
+                                <input type="text" class="form-control" value="@(Model.borrowing?.patron?.PatronName ?? "N/A")" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Email độc giả</label>
+                                <input type="text" class="form-control" value="@(Model.borrowing?.patron?.Email ?? "-")" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Số điện thoại</label>
+                                <input type="text" class="form-control" value="@(Model.borrowing?.patron?.Phone ?? "-")" readonly />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Ngày mượn</label>
+                                <input type="text" class="form-control" value="@(Model.borrowing?.BorrowDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Hạn trả</label>
+                                <input type="text" class="form-control" value="@(Model.borrowing?.DueDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Ngày trả thực tế</label>
+                                <input type="text" class="form-control" value="@(Model.ReturnDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")" readonly />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Thủ thư tiếp nhận</label>
+                                <input type="text" class="form-control" value="@(Model.librarian?.FullName ?? "N/A")" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Tổng tiền phạt</label>
+                                <input type="text" class="form-control fw-bold text-danger" value="@($"{Model.TotalFine:N0} VNĐ")" readonly />
+                            </div>
+                        </div>
+
+                        <h5 class="card-title">Chi tiết sách trả</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 60px;">STT</th>
+                                        <th class="text-center" style="width: 95px;">Mã sách</th>
+                                        <th>Tên sách</th>
+                                        <th class="text-center" style="width: 140px;">Tình trạng</th>
+                                        <th class="text-center" style="width: 110px;">Quá hạn (ngày)</th>
+                                        <th class="text-center" style="width: 140px;">Phạt quá hạn</th>
+                                        <th class="text-center" style="width: 140px;">Phạt hư hỏng/mất</th>
+                                        <th class="text-center" style="width: 150px;">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.returnDetail != null && Model.returnDetail.Any())
+                                    {
+                                        int stt = 0;
+                                        foreach (var detail in Model.returnDetail)
+                                        {
+                                            stt++;
+                                            var rowTotal = detail.OverdueFine + detail.LostFine;
+                                            <tr>
+                                                <td class="text-center">@stt</td>
+                                                <td class="text-center">@detail.BookID</td>
+                                                <td>@(detail.book?.TitleBook ?? "N/A")</td>
+                                                <td class="text-center">
+                                                    @if (detail.IsDamaged)
+                                                    {
+                                                        <span class="badge bg-danger">Hư hỏng / Mất</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success">Bình thường</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">@detail.OverdueDays</td>
+                                                <td class="text-center">@detail.OverdueFine.ToString("N0") VNĐ</td>
+                                                <td class="text-center">@detail.LostFine.ToString("N0") VNĐ</td>
+                                                <td class="text-center fw-bold text-danger">@rowTotal.ToString("N0") VNĐ</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted">Chưa có sách nào trong phiếu trả này.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <hr />
+
+                        @* === PHƯƠNG THỨC THANH TOÁN === *@
+                        <div class="card border bg-light mb-4">
+                            <div class="card-body pt-3">
+                                <h5 class="card-title pt-0 mb-3">
+                                    <i class="bi bi-credit-card-2-front me-2 text-primary"></i>Phương thức thanh toán
+                                </h5>
+
+                                @if (isPaid && latestPayment != null)
+                                {
+                                    <div class="alert alert-success d-flex align-items-center mb-3">
+                                        <i class="bi bi-patch-check-fill fs-4 me-2"></i>
+                                        <div>
+                                            Phiếu trả này đã <strong>thanh toán thành công</strong> bằng
+                                            <strong>@latestPayment.PaymentMethod</strong> vào lúc
+                                            <strong>@latestPayment.PaymentDate.ToString("dd/MM/yyyy HH:mm:ss")</strong>
+                                            và đã được lưu lịch sử giao dịch. Không thể thực hiện thanh toán lại.
+                                        </div>
+                                    </div>
+
+                                    <form asp-action="Export" method="get" class="d-flex flex-wrap align-items-end gap-2">
+                                        <input type="hidden" name="id" value="@Model.ReturnID" />
+                                        <div>
+                                            <label class="form-label fw-bold mb-1">Định dạng xuất</label>
+                                            <select name="format" class="form-select form-select-sm" required>
+                                                <option value="pdf">PDF</option>
+                                                <option value="word">Word (.docx)</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm px-3 py-2">
+                                            <i class="bi bi-receipt me-2"></i>Xuất phiếu trả / hóa đơn
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="d-flex flex-wrap gap-4 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="chkCashPayment" />
+                                            <label class="form-check-label fw-semibold" for="chkCashPayment">
+                                                <i class="bi bi-cash-coin text-success me-1"></i>Thanh toán tiền mặt
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="chkBankPayment" />
+                                            <label class="form-check-label fw-semibold" for="chkBankPayment">
+                                                <i class="bi bi-qr-code-scan text-primary me-1"></i>Thanh toán qua ngân hàng (VietQR)
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    @* Gợi ý khi chưa chọn *@
+                                    <div id="paymentHint" class="text-muted small">
+                                        <i class="bi bi-info-circle me-1"></i>Vui lòng tích chọn một phương thức thanh toán để tiến hành xuất phiếu / hóa đơn.
+                                    </div>
+
+                                    @* Khu vực Thanh toán tiền mặt -> xác nhận để lưu lịch sử và xuất phiếu *@
+                                    <div id="cashPaymentSection" class="d-none border-top pt-3 mt-3">
+                                        <div id="cashStatusAlert" class="alert alert-success py-2 px-3 mb-3 d-inline-flex align-items-center">
+                                            <i class="bi bi-check-circle-fill me-2"></i>
+                                            <span id="cashStatusText">Đã chọn phương thức <strong>Thanh toán tiền mặt</strong>. Tích vào ô xác nhận bên dưới để lưu lịch sử giao dịch vào CSDL.</span>
+                                        </div>
+
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="chkConfirmCashPaid" />
+                                            <label class="form-check-label fw-semibold text-success" for="chkConfirmCashPaid">
+                                                <i class="bi bi-check2-square me-1"></i>Xác nhận đã thanh toán tiền mặt
+                                            </label>
+                                        </div>
+
+                                        <form id="cashExportForm" asp-action="Export" method="get" class="d-flex flex-wrap align-items-end gap-2">
+                                            <input type="hidden" name="id" value="@Model.ReturnID" />
+                                            <div>
+                                                <label class="form-label fw-bold mb-1">Định dạng xuất</label>
+                                                <select name="format" class="form-select form-select-sm" required>
+                                                    <option value="pdf">PDF</option>
+                                                    <option value="word">Word (.docx)</option>
+                                                </select>
+                                            </div>
+                                            <button type="submit" id="btnExportCash" class="btn btn-primary btn-sm px-3 py-2" disabled>
+                                                <i class="bi bi-download me-2"></i>Xuất phiếu trả
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    @* Khu vực Thanh toán qua ngân hàng (VietQR) *@
+                                    <div id="bankPaymentSection" class="d-none border-top pt-3 mt-3">
+                                        <div id="qrLoadingBox" class="text-muted py-3">
+                                            <span class="spinner-border spinner-border-sm me-2"></span>Đang tạo mã VietQR thanh toán...
+                                        </div>
+                                        <div id="qrErrorBox" class="alert alert-danger d-none py-2"></div>
+
+                                        <div id="qrContentBox" class="d-none">
+                                            <div class="row align-items-center g-4">
+                                                <div class="col-md-5 text-center">
+                                                    <div class="bg-white p-3 rounded border shadow-sm d-inline-block">
+                                                        <img id="detailQrImage" src="" alt="VietQR" class="img-fluid" style="max-width: 260px;" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <h6 class="fw-bold text-primary mb-3">Thông tin chuyển khoản VietQR</h6>
+                                                    <ul class="list-group list-group-flush mb-3 bg-white rounded border">
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span class="text-muted">Ngân hàng:</span>
+                                                            <strong id="detailQrBank"></strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span class="text-muted">Số tài khoản:</span>
+                                                            <strong id="detailQrAccount"></strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span class="text-muted">Chủ tài khoản:</span>
+                                                            <strong id="detailQrAccountName"></strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span class="text-muted">Số tiền:</span>
+                                                            <strong id="detailQrAmount" class="text-danger"></strong>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between">
+                                                            <span class="text-muted">Nội dung CK:</span>
+                                                            <strong id="detailQrAddInfo"></strong>
+                                                        </li>
+                                                    </ul>
+
+                                                    @* Chỉ hiển thị bộ đếm tự động khi đã cấu hình SePay *@
+                                                    <div id="bankAutoCheckBox" class="alert alert-info d-none py-2 px-3 mb-3 align-items-center justify-content-between">
+                                                        <div class="small">
+                                                            <span class="spinner-border spinner-border-sm me-2"></span>
+                                                            <span id="bankAutoCheckText">Đang chờ biến động số dư từ SePay...</span>
+                                                        </div>
+                                                        <span id="bankCountdown" class="badge bg-primary ms-2">05:00</span>
+                                                    </div>
+
+                                                    @* Xác nhận đã thanh toán qua ngân hàng để lưu lịch sử và cho phép xuất phiếu trả *@
+                                                    <div id="bankConfirmSection" class="mb-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="chkConfirmBankPaid" />
+                                                            <label class="form-check-label fw-semibold text-success" for="chkConfirmBankPaid">
+                                                                <i class="bi bi-check2-square me-1"></i>Xác nhận đã thanh toán qua ngân hàng
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    @* Xuất hiện sau khi xác nhận thanh toán qua ngân hàng thành công *@
+                                                    <div id="bankPaidSuccessBox" class="d-none mt-3">
+                                                        <div class="alert alert-success py-2 px-3 mb-3 d-flex align-items-center">
+                                                            <i class="bi bi-patch-check-fill fs-5 me-2"></i>
+                                                            <span id="bankSuccessMessage">Đã xác nhận thanh toán qua ngân hàng <strong>thành công</strong> và lưu vào lịch sử CSDL! Bạn có thể xuất phiếu trả cho độc giả.</span>
+                                                        </div>
+
+                                                        <form asp-action="Export" method="get" class="d-flex flex-wrap align-items-end gap-2">
+                                                            <input type="hidden" name="id" value="@Model.ReturnID" />
+                                                            <div>
+                                                                <label class="form-label fw-bold mb-1">Định dạng xuất</label>
+                                                                <select name="format" class="form-select form-select-sm" required>
+                                                                    <option value="pdf">PDF</option>
+                                                                    <option value="word">Word (.docx)</option>
+                                                                </select>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary px-3 py-2">
+                                                                <i class="bi bi-download me-2"></i>Xuất phiếu trả
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div id="paymentSaveError" class="alert alert-danger d-none py-2 mb-3"></div>
+                        @Html.AntiForgeryToken()
+
+                        @* === LỊCH SỬ THANH TOÁN (LƯU TRONG CSDL) & ĐỐI SOÁT SAI LỆCH === *@
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                            <h5 class="card-title mb-0 py-2">
+                                <i class="bi bi-clock-history me-2 text-primary"></i>Lịch sử thanh toán
+                            </h5>
+                            @if (!isPaid)
+                            {
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#reconcileCollapse">
+                                    <i class="bi bi-shield-check me-1"></i>Đối soát giao dịch sai thông tin
+                                </button>
+                            }
+                        </div>
+
+                        @if (!isPaid)
+                        {
+                            <div class="collapse mb-3" id="reconcileCollapse">
+                                <div id="bankReconcileBox" class="card border bg-light mb-0">
+                                    <div class="card-body py-3">
+                                        <h6 class="fw-bold text-dark mb-1">
+                                            <i class="bi bi-shield-exclamation text-warning me-1"></i>Đối soát giao dịch khi sai thông tin / chênh lệch số tiền
+                                        </h6>
+                                        <p class="text-muted small mb-3">
+                                            Dùng khi cần đối chiếu sao kê ngân hàng với hệ thống (nhập mã giao dịch và số tiền ngân hàng thực nhận để kiểm tra trùng khớp và ghi lịch sử).
+                                        </p>
+                                        <form id="bankReconcileForm" class="row g-2 align-items-end">
+                                            <div class="col-md-4">
+                                                <label class="form-label small fw-bold mb-1" for="txtBankTransactionCode">Mã giao dịch ngân hàng</label>
+                                                <input type="text" id="txtBankTransactionCode" class="form-control form-control-sm"
+                                                       placeholder="VD: FT26328123456" maxlength="100" required />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small fw-bold mb-1" for="txtBankReceivedAmount">Số tiền ngân hàng nhận (VNĐ)</label>
+                                                <input type="number" id="txtBankReceivedAmount" class="form-control form-control-sm"
+                                                       placeholder="Nhập số tiền thực nhận..." min="0" step="1000" required />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button type="submit" id="btnReconcileBank" class="btn btn-primary btn-sm px-3">
+                                                    <i class="bi bi-check2-all me-1"></i>Kiểm tra &amp; Lưu đối soát
+                                                </button>
+                                            </div>
+                                        </form>
+                                        <div id="bankPaidFailedBox" class="alert alert-danger d-none py-2 px-3 mt-3 mb-0 small">
+                                            <i class="bi bi-x-circle-fill me-2"></i>
+                                            <span id="bankFailedMessage">Số tiền ngân hàng nhận không trùng khớp với hệ thống.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered table-hover align-middle" id="paymentHistoryTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 150px;">Mã giao dịch</th>
+                                        <th class="text-center" style="width: 160px;">Thời gian</th>
+                                        <th class="text-center" style="width: 200px;">Phương thức</th>
+                                        <th class="text-center" style="width: 130px;">Số tiền</th>
+                                        <th>Ngân hàng / Nội dung</th>
+                                        <th class="text-center" style="width: 160px;">Người xác nhận</th>
+                                        <th class="text-center" style="width: 125px;">Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentHistoryBody">
+                                    @if (paymentHistories.Any())
+                                    {
+                                        foreach (var p in paymentHistories)
+                                        {
+                                            <tr>
+                                                <td class="text-center fw-bold text-primary">@(string.IsNullOrWhiteSpace(p.TransactionCode) ? $"#{p.PaymentID}" : p.TransactionCode)</td>
+                                                <td class="text-center">@p.PaymentDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                                <td class="text-center">
+                                                    <span class="badge @(p.PaymentMethod.Contains("ngân hàng") ? "bg-primary" : "bg-success")">
+                                                        @p.PaymentMethod
+                                                    </span>
+                                                </td>
+                                                <td class="text-center fw-bold text-danger">@p.Amount.ToString("N0") VNĐ</td>
+                                                <td>
+                                                    @if (!string.IsNullOrWhiteSpace(p.BankName))
+                                                    {
+                                                        <div class="small text-muted">@p.BankName - @p.BankAccountNumber</div>
+                                                    }
+                                                    <div>@(p.TransactionContent ?? "-")</div>
+                                                </td>
+                                                <td class="text-center">@(p.ConfirmedBy ?? "-")</td>
+                                                <td class="text-center">
+                                                    <span class="badge @(p.PaymentStatus == "Đã thanh toán" ? "bg-success" :
+                                                                         p.PaymentStatus == "Thu dư" ? "bg-warning text-dark" :
+                                                                         p.PaymentStatus == "Đã thu một phần" ? "bg-info text-dark" : "bg-danger")">
+                                                        @p.PaymentStatus
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr id="emptyPaymentHistoryRow">
+                                            <td colspan="7" class="text-center text-muted">Chưa có lịch sử thanh toán cho phiếu trả này.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-start">
+                            <a asp-action="Index" class="btn btn-warning">
+                                <i class="bi bi-arrow-left-circle me-1"></i>Quay lại danh sách
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    <script>
+        (function () {
+            const chkCash = document.getElementById('chkCashPayment');
+            const chkBank = document.getElementById('chkBankPayment');
+            if (!chkCash || !chkBank) return;
+            const returnStatusBadge = document.getElementById('returnStatusBadge');
+            const paymentHint = document.getElementById('paymentHint');
+            const cashSection = document.getElementById('cashPaymentSection');
+            const btnExportCash = document.getElementById('btnExportCash');
+
+            const bankSection = document.getElementById('bankPaymentSection');
+            const qrLoading = document.getElementById('qrLoadingBox');
+            const qrError = document.getElementById('qrErrorBox');
+            const qrContent = document.getElementById('qrContentBox');
+            const qrImage = document.getElementById('detailQrImage');
+            const bankAutoCheckBox = document.getElementById('bankAutoCheckBox');
+            const bankAutoCheckText = document.getElementById('bankAutoCheckText');
+            const bankCountdown = document.getElementById('bankCountdown');
+            const chkConfirmBankPaid = document.getElementById('chkConfirmBankPaid');
+            const bankConfirmSection = document.getElementById('bankConfirmSection');
+            const bankReconcileBox = document.getElementById('bankReconcileBox');
+            const bankReconcileForm = document.getElementById('bankReconcileForm');
+            const txtBankTransactionCode = document.getElementById('txtBankTransactionCode');
+            const txtBankReceivedAmount = document.getElementById('txtBankReceivedAmount');
+            const btnReconcileBank = document.getElementById('btnReconcileBank');
+            const bankPaidFailedBox = document.getElementById('bankPaidFailedBox');
+            const bankFailedMessage = document.getElementById('bankFailedMessage');
+            const bankPaidSuccessBox = document.getElementById('bankPaidSuccessBox');
+            const bankSuccessMessage = document.getElementById('bankSuccessMessage');
+            const chkConfirmCashPaid = document.getElementById('chkConfirmCashPaid');
+            const cashStatusText = document.getElementById('cashStatusText');
+            const paymentSaveError = document.getElementById('paymentSaveError');
+            const paymentHistoryBody = document.getElementById('paymentHistoryBody');
+            const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            let qrLoaded = false;
+            let cashSaved = false;
+            let bankSaved = false;
+            let pollTimer = null;
+            let countdownTimer = null;
+            let remainingSeconds = 300;
+            const renderedTxCodes = new Set();
+
+            function badgeClassForStatus(status) {
+                if (status === 'Đã thanh toán') return 'bg-success';
+                if (status === 'Thu dư') return 'bg-warning text-dark';
+                if (status === 'Đã thu một phần') return 'bg-info text-dark';
+                return 'bg-danger';
+            }
+
+            function appendPaymentRow(p) {
+                const txCode = p.transactionCode || ('#' + p.paymentId);
+                if (renderedTxCodes.has(txCode)) return;
+                renderedTxCodes.add(txCode);
+
+                const emptyRow = document.getElementById('emptyPaymentHistoryRow');
+                if (emptyRow) emptyRow.remove();
+
+                const isBank = (p.paymentMethod || '').toLowerCase().includes('vietqr') ||
+                               (p.paymentMethod || '').toLowerCase().includes('ngân hàng');
+                const tr = document.createElement('tr');
+                tr.innerHTML =
+                    `<td class="text-center fw-bold text-primary">${txCode}</td>` +
+                    `<td class="text-center">${p.paymentDate}</td>` +
+                    `<td class="text-center"><span class="badge ${isBank ? 'bg-primary' : 'bg-success'}">${p.paymentMethod}</span></td>` +
+                    `<td class="text-center fw-bold text-danger">${Number(p.amount || 0).toLocaleString('vi-VN')} VNĐ</td>` +
+                    `<td>${p.bankInfo && p.bankInfo !== '-' ? `<div class="small text-muted">${p.bankInfo}</div>` : ''}<div>${p.transactionContent || '-'}</div></td>` +
+                    `<td class="text-center">${p.confirmedBy || '-'}</td>` +
+                    `<td class="text-center"><span class="badge ${badgeClassForStatus(p.paymentStatus)}">${p.paymentStatus}</span></td>`;
+                paymentHistoryBody.prepend(tr);
+            }
+
+            function stopBankPolling() {
+                if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+                if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+            }
+
+            function formatTimer(sec) {
+                const m = String(Math.floor(sec / 60)).padStart(2, '0');
+                const s = String(sec % 60).padStart(2, '0');
+                return m + ':' + s;
+            }
+
+            async function pollSePayStatusOnce() {
+                if (bankSaved || !chkBank.checked) {
+                    stopBankPolling();
+                    return;
+                }
+                try {
+                    const res = await fetch('/api/payments/@Model.ReturnID/status', {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        cache: 'no-store'
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (!data) return;
+
+                    if (data.status === 'success') {
+                        bankSaved = true;
+                        stopBankPolling();
+                        if (data.payment) appendPaymentRow(data.payment);
+                        markPaidUI();
+                        if (bankAutoCheckBox) { bankAutoCheckBox.classList.add('d-none'); bankAutoCheckBox.classList.remove('d-flex'); }
+                        if (bankConfirmSection) bankConfirmSection.classList.add('d-none');
+                        if (bankReconcileBox) bankReconcileBox.classList.add('d-none');
+                        if (bankPaidFailedBox) bankPaidFailedBox.classList.add('d-none');
+                        bankSuccessMessage.textContent = data.message || 'Đã nhận thanh toán qua ngân hàng thành công!';
+                        bankPaidSuccessBox.classList.remove('d-none');
+                    } else if (data.status === 'partial') {
+                        if (data.payment) appendPaymentRow(data.payment);
+                        if (bankAutoCheckBox) { bankAutoCheckBox.classList.remove('d-none'); bankAutoCheckBox.classList.add('d-flex'); }
+                        bankAutoCheckText.textContent = data.message || 'Đã thu một phần, đang chờ phần còn lại...';
+                    } else if (data.status === 'pending' && data.notConfigured) {
+                        // Chưa cấu hình SePay -> dừng polling và ẩn khung chờ để không gây rối
+                        stopBankPolling();
+                        if (bankAutoCheckBox) { bankAutoCheckBox.classList.add('d-none'); bankAutoCheckBox.classList.remove('d-flex'); }
+                    } else if (data.status === 'pending') {
+                        if (bankAutoCheckBox) { bankAutoCheckBox.classList.remove('d-none'); bankAutoCheckBox.classList.add('d-flex'); }
+                    }
+                } catch {
+                    // Thử lại ở chu kỳ tiếp theo
+                }
+            }
+
+            function startBankPolling() {
+                stopBankPolling();
+                if (bankSaved) return;
+                remainingSeconds = 300;
+                if (bankCountdown) bankCountdown.textContent = formatTimer(remainingSeconds);
+
+                pollSePayStatusOnce();
+                pollTimer = setInterval(pollSePayStatusOnce, 3000);
+                countdownTimer = setInterval(function () {
+                    remainingSeconds--;
+                    if (remainingSeconds <= 0) {
+                        stopBankPolling();
+                    } else if (bankCountdown) {
+                        bankCountdown.textContent = formatTimer(remainingSeconds);
+                    }
+                }, 1000);
+            }
+
+            async function savePaymentHistory(method) {
+                paymentSaveError.classList.add('d-none');
+                const formData = new URLSearchParams();
+                formData.append('returnId', '@Model.ReturnID');
+                formData.append('paymentMethod', method);
+
+                const res = await fetch('@Url.Action("ConfirmPayment", "Return", new { area = "Admin" })', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'RequestVerificationToken': antiForgeryToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData.toString()
+                });
+
+                if (!res.ok) {
+                    throw new Error('Không thể lưu lịch sử thanh toán (HTTP ' + res.status + ').');
+                }
+
+                const data = await res.json();
+                if (!data || !data.success) {
+                    throw new Error((data && data.message) || 'Không thể lưu lịch sử thanh toán.');
+                }
+
+                if (data.payment) {
+                    appendPaymentRow(data.payment);
+                }
+                return data;
+            }
+
+            async function loadVietQr() {
+                if (qrLoaded) return;
+
+                qrLoading.classList.remove('d-none');
+                qrError.classList.add('d-none');
+                qrContent.classList.add('d-none');
+
+                try {
+                    const url = '@Url.Action("PaymentQr", "Return", new { area = "Admin", id = Model.ReturnID })';
+                    const res = await fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!res.ok) throw new Error('Không thể tạo mã QR (HTTP ' + res.status + ').');
+
+                    const data = await res.json();
+                    if (!data || !data.success) {
+                        throw new Error((data && data.message) || 'Không thể tạo mã QR.');
+                    }
+
+                    qrImage.onerror = function () {
+                        if (data.payload && !qrImage.dataset.fallbackUsed) {
+                            qrImage.dataset.fallbackUsed = '1';
+                            qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(data.payload);
+                        }
+                    };
+                    delete qrImage.dataset.fallbackUsed;
+                    qrImage.src = data.imageUrl || (data.payload ? 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(data.payload) : '');
+
+                    document.getElementById('detailQrBank').textContent = (data.bankName || '') + (data.bankBin ? ' (' + data.bankBin + ')' : '');
+                    document.getElementById('detailQrAccount').textContent = data.accountNumber || '';
+                    document.getElementById('detailQrAccountName').textContent = data.accountName || '';
+                    document.getElementById('detailQrAmount').textContent = Number(data.amount || 0).toLocaleString('vi-VN') + ' VNĐ';
+                    document.getElementById('detailQrAddInfo').textContent = data.addInfo || '';
+
+                    qrLoading.classList.add('d-none');
+                    qrContent.classList.remove('d-none');
+                    qrLoaded = true;
+                    startBankPolling();
+                } catch (err) {
+                    qrLoading.classList.add('d-none');
+                    qrError.textContent = err && err.message ? err.message : 'Có lỗi xảy ra khi tạo mã VietQR.';
+                    qrError.classList.remove('d-none');
+                }
+            }
+
+            function updatePaymentUI() {
+                if (chkCash.checked) {
+                    stopBankPolling();
+                    paymentHint.classList.add('d-none');
+                    cashSection.classList.remove('d-none');
+                    btnExportCash.disabled = false;
+                    bankSection.classList.add('d-none');
+                } else if (chkBank.checked) {
+                    paymentHint.classList.add('d-none');
+                    cashSection.classList.add('d-none');
+                    btnExportCash.disabled = true;
+                    bankSection.classList.remove('d-none');
+                    if (qrLoaded) {
+                        startBankPolling();
+                    } else {
+                        loadVietQr();
+                    }
+                } else {
+                    stopBankPolling();
+                    paymentHint.classList.add('d-none');
+                    cashSection.classList.add('d-none');
+                    btnExportCash.disabled = true;
+                    bankSection.classList.add('d-none');
+                }
+            }
+
+            chkCash.addEventListener('change', function () {
+                if (chkCash.checked) {
+                    chkBank.checked = false;
+                }
+                updatePaymentUI();
+            });
+
+            chkBank.addEventListener('change', function () {
+                if (chkBank.checked) {
+                    chkCash.checked = false;
+                }
+                updatePaymentUI();
+            });
+
+            function markPaidUI() {
+                // Khóa cả 2 phương thức thanh toán để không thể thanh toán lại
+                chkCash.disabled = true;
+                chkBank.disabled = true;
+                if (returnStatusBadge) {
+                    returnStatusBadge.classList.remove('bg-danger');
+                    returnStatusBadge.classList.add('bg-success');
+                    returnStatusBadge.textContent = 'Đã hoàn tất';
+                }
+            }
+
+            chkConfirmCashPaid.addEventListener('change', async function () {
+                if (!chkConfirmCashPaid.checked || cashSaved) return;
+
+                chkConfirmCashPaid.disabled = true;
+                try {
+                    await savePaymentHistory('Cash');
+                    cashSaved = true;
+                    markPaidUI();
+                    cashStatusText.innerHTML = 'Đã <strong>xác nhận thanh toán tiền mặt</strong> và lưu lịch sử giao dịch vào CSDL!';
+                } catch (err) {
+                    paymentSaveError.textContent = err && err.message ? err.message : 'Lỗi khi lưu lịch sử thanh toán tiền mặt.';
+                    paymentSaveError.classList.remove('d-none');
+                    chkConfirmCashPaid.checked = false;
+                    chkConfirmCashPaid.disabled = false;
+                }
+            });
+
+            if (chkConfirmBankPaid) {
+                chkConfirmBankPaid.addEventListener('change', async function () {
+                    if (!chkConfirmBankPaid.checked || bankSaved) return;
+
+                    chkConfirmBankPaid.disabled = true;
+                    try {
+                        await savePaymentHistory('Bank');
+                        bankSaved = true;
+                        stopBankPolling();
+                        markPaidUI();
+                        if (bankAutoCheckBox) { bankAutoCheckBox.classList.add('d-none'); bankAutoCheckBox.classList.remove('d-flex'); }
+                        if (bankReconcileBox) bankReconcileBox.classList.add('d-none');
+                        bankPaidSuccessBox.classList.remove('d-none');
+                    } catch (err) {
+                        paymentSaveError.textContent = err && err.message ? err.message : 'Lỗi khi xác nhận thanh toán qua ngân hàng.';
+                        paymentSaveError.classList.remove('d-none');
+                        chkConfirmBankPaid.checked = false;
+                        chkConfirmBankPaid.disabled = false;
+                    }
+                });
+            }
+
+            if (bankReconcileForm) {
+                bankReconcileForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    if (bankSaved) return;
+
+                    paymentSaveError.classList.add('d-none');
+                    bankPaidFailedBox.classList.add('d-none');
+                    btnReconcileBank.disabled = true;
+
+                    try {
+                        const formData = new URLSearchParams();
+                        formData.append('returnId', '@Model.ReturnID');
+                        formData.append('transactionCode', txtBankTransactionCode.value.trim());
+                        formData.append('receivedAmount', txtBankReceivedAmount.value.trim());
+
+                        const res = await fetch('@Url.Action("ReconcileBankPayment", "Return", new { area = "Admin" })', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                'RequestVerificationToken': antiForgeryToken,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: formData.toString()
+                        });
+
+                        if (!res.ok) {
+                            throw new Error('Không thể đối soát giao dịch (HTTP ' + res.status + ').');
+                        }
+
+                        const data = await res.json();
+                        if (!data) {
+                            throw new Error('Phản hồi không hợp lệ từ máy chủ.');
+                        }
+
+                        if (data.payment) {
+                            appendPaymentRow(data.payment);
+                        }
+
+                        if (data.status === 'success') {
+                            bankSaved = true;
+                            stopBankPolling();
+                            markPaidUI();
+                            if (bankAutoCheckBox) { bankAutoCheckBox.classList.add('d-none'); bankAutoCheckBox.classList.remove('d-flex'); }
+                            if (bankConfirmSection) bankConfirmSection.classList.add('d-none');
+                            if (bankReconcileBox) bankReconcileBox.classList.add('d-none');
+                            if (bankPaidFailedBox) bankPaidFailedBox.classList.add('d-none');
+                            bankSuccessMessage.textContent = data.message || 'Đối soát thành công!';
+                            bankPaidSuccessBox.classList.remove('d-none');
+                        } else if (data.status === 'failed') {
+                            bankFailedMessage.textContent = data.message || 'Số tiền không trùng khớp.';
+                            bankPaidFailedBox.classList.remove('d-none');
+                            btnReconcileBank.disabled = false;
+                        } else {
+                            paymentSaveError.textContent = data.message || 'Không thể đối soát giao dịch.';
+                            paymentSaveError.classList.remove('d-none');
+                            btnReconcileBank.disabled = false;
+                        }
+                    } catch (err) {
+                        paymentSaveError.textContent = err && err.message ? err.message : 'Lỗi khi đối soát giao dịch.';
+                        paymentSaveError.classList.remove('d-none');
+                        btnReconcileBank.disabled = false;
+                    }
+                });
+            }
+            window.addEventListener('beforeunload', stopBankPolling);
+        })();
+    </script>
+}

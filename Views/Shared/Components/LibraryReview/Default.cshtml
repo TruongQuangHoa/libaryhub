@@ -1,0 +1,439 @@
+@using LibraryHub.Models
+@model IList<tblLibraryReview>
+
+<section id="testimonials" class="testimonials section">
+
+    <!-- Section Title -->
+    <div class="container section-title" data-aos="fade-up">
+        <h2>Đánh giá về thư viện</h2>
+        <p>Lắng nghe cảm nhận và chia sẻ từ những độc giả đã trải nghiệm thư viện</p>
+    </div>
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="testimonials-container">
+                <div class="swiper testimonials-slider init-swiper" data-aos="fade-up" data-aos-delay="200">
+
+                    <script type="application/json" class="swiper-config">
+                                                                {
+                                                                    "loop": true,
+                                                                    "speed": 600,
+                                                                    "autoplay": {
+                                                                        "delay": 5000,
+                                                                        "disableOnInteraction": false
+                                                                    },
+                                                                    "slidesPerView": 1,
+                                                                    "spaceBetween": 30,
+                                                                    "pagination": {
+                                                                        "el": ".swiper-pagination",
+                                                                        "type": "bullets",
+                                                                        "clickable": true
+                                                                    },
+                                                                    "breakpoints": {
+                                                                        "768": {
+                                                                            "slidesPerView": 2
+                                                                        },
+                                                                        "992": {
+                                                                            "slidesPerView": 3
+                                                                        }
+                                                                    }
+                                                                }
+                    </script>
+
+                    <div class="swiper-wrapper">
+
+                        @foreach (var item in Model)
+                        {
+                            <div class="swiper-slide">
+                                <div class="testimonial-item h-100">
+
+                                    <!-- Rating -->
+                                    <div class="stars">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= item.Rating)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star"></i>
+                                            }
+                                        }
+                                    </div>
+
+                                    <!-- Review Content -->
+                                    <p>
+                                        @item.ReviewContent
+                                    </p>
+
+                                    <!-- Reviewer -->
+                                    <div class="testimonial-profile">
+
+                                        @if (!string.IsNullOrWhiteSpace(item.Avatar))
+                                        {
+                                            <img src="@item.Avatar" alt="Ảnh đại diện @item.FullName"
+                                                 class="img-fluid rounded-circle" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <div class="review-avatar-placeholder">
+                                                <i class="bi bi-person-fill"></i>
+                                            </div>
+                                        }
+
+                                        <div>
+                                            <h3>@item.FullName</h3>
+
+                                            @if (!string.IsNullOrWhiteSpace(item.ReviewerTitle))
+                                            {
+                                                <h4>@item.ReviewerTitle</h4>
+                                            }
+                                            else
+                                            {
+                                                <h4>Độc giả thư viện</h4>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <!-- Slider Pagination -->
+                    <div class="swiper-pagination"></div>
+
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="review-empty-icon mb-3">
+                    <i class="bi bi-chat-square-heart"></i>
+                </div>
+
+                <h4>Chưa có đánh giá nào</h4>
+                <p class="text-muted mb-0">
+                    Những chia sẻ từ độc giả sẽ được hiển thị tại đây.
+                </p>
+            </div>
+        }
+
+    </div>
+
+    <!-- KHU VỰC GỬI ĐÁNH GIÁ -->
+    <div class="review-form-wrapper">
+
+        <div class="review-form-heading">
+            <h3>Chia sẻ cảm nhận của bạn</h3>
+            <p>
+                Những đánh giá của bạn sẽ giúp thư viện nâng cao chất lượng
+                phục vụ và mang đến trải nghiệm tốt hơn.
+            </p>
+        </div>
+
+        @if (TempData["ReviewSuccess"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["ReviewSuccess"]
+            </div>
+        }
+
+        @if (TempData["ReviewError"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                @TempData["ReviewError"]
+            </div>
+        }
+
+        @if (ViewBag.IsPatron == true)
+        {
+            <form asp-controller="LibraryReview" asp-action="Create" method="post" class="library-review-form">
+
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label for="Rating">
+                        Mức độ hài lòng
+                    </label>
+
+                    <select name="Rating" id="Rating" class="form-select">
+                        <option value="5" selected>★★★★★ - Rất hài lòng</option>
+                        <option value="4">★★★★ - Hài lòng</option>
+                        <option value="3">★★★ - Bình thường</option>
+                        <option value="2">★★ - Chưa hài lòng</option>
+                        <option value="1">★ - Không hài lòng</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ReviewContent">
+                        Nội dung đánh giá
+                    </label>
+
+                    <textarea name="ReviewContent" id="ReviewContent" class="form-control" rows="5" maxlength="5000"
+                              placeholder="Hãy chia sẻ trải nghiệm của bạn tại thư viện..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit-review">
+                    <i class="bi bi-send-fill"></i>
+                    Gửi đánh giá
+                </button>
+
+                <p class="review-note">
+                    <i class="bi bi-info-circle"></i>
+                    Đánh giá của bạn sẽ được quản trị viên kiểm duyệt
+                    trước khi hiển thị công khai.
+                </p>
+
+            </form>
+        }
+        else if (ViewBag.IsPatronProfileMissing == true)
+        {
+            <div class="review-login-notice">
+                <p>
+                    Tài khoản của bạn chưa có hồ sơ độc giả.
+                    Vui lòng liên hệ quản trị viên để được hỗ trợ.
+                </p>
+            </div>
+        }
+        else if (ViewBag.IsAuthenticated == true)
+        {
+            <div class="review-login-notice">
+                <p>
+                    Chức năng gửi đánh giá chỉ dành cho tài khoản độc giả.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="review-login-notice">
+                <p>
+                    Bạn cần có tài khoản độc giả và đăng nhập
+                    để gửi đánh giá về thư viện.
+                </p>
+
+                <div class="review-auth-buttons">
+                    <a asp-controller="Register" asp-action="Index" class="btn-review-register">
+                        Đăng ký tài khoản
+                    </a>
+
+                    <a asp-controller="Login" asp-action="Index" class="btn-review-login">
+                        Đăng nhập
+                    </a>
+                </div>
+            </div>
+        }
+
+    </div>
+    <!-- KẾT THÚC KHU VỰC GỬI ĐÁNH GIÁ -->
+</section>
+
+<style>
+    #testimonials .testimonial-item {
+        height: 100%;
+        min-height: 260px;
+        padding: 30px;
+        background: #fff;
+        border-radius: 16px;
+        border-top: 3px solid var(--accent-color, #0d6efd);
+        box-shadow: 0 8px 25px rgba(30, 50, 80, 0.07);
+        transition: all 0.3s ease;
+    }
+
+    #testimonials .testimonial-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(30, 50, 80, 0.12);
+    }
+
+    #testimonials .testimonial-item .stars {
+        color: #ffc107;
+        font-size: 19px;
+        margin-bottom: 18px;
+    }
+
+    #testimonials .testimonial-item p {
+        color: #596579;
+        font-style: italic;
+        line-height: 1.8;
+        overflow-wrap: anywhere;
+    }
+
+    #testimonials .testimonial-profile {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 22px;
+    }
+
+    #testimonials .testimonial-profile img,
+    #testimonials .review-avatar-placeholder {
+        width: 55px;
+        height: 55px;
+        min-width: 55px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #d8e7fa;
+    }
+
+    #testimonials .review-avatar-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #edf4fc;
+        color: #6b8db8;
+        font-size: 27px;
+    }
+
+    #testimonials .testimonial-profile h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #263f60;
+        margin: 0 0 5px;
+    }
+
+    #testimonials .testimonial-profile h4 {
+        font-size: 14px;
+        color: #8993a2;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    #testimonials .swiper-pagination {
+        position: relative;
+        margin-top: 30px;
+    }
+
+    #testimonials .review-empty-icon {
+        color: #9bb8dc;
+        font-size: 55px;
+    }
+
+    .review-form-wrapper {
+        max-width: 850px;
+        margin: 45px auto 55px;
+        padding: 30px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+    }
+
+    .review-form-heading {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .review-form-heading h3 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #173b6c;
+        margin-bottom: 10px;
+    }
+
+    .review-form-heading p {
+        color: #777;
+        font-size: 14px;
+    }
+
+    .library-review-form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .library-review-form label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .library-review-form .form-control,
+    .library-review-form .form-select {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .library-review-form textarea {
+        resize: vertical;
+    }
+
+    .btn-submit-review {
+        background: #173b6c;
+        color: #fff;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .btn-submit-review:hover {
+        background: #245b9c;
+    }
+
+    .review-note {
+        margin-top: 15px;
+        font-size: 13px;
+        color: #888;
+    }
+
+    .review-login-notice {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .review-login-notice p {
+        color: #555;
+        margin-bottom: 18px;
+    }
+
+    .review-auth-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-review-register,
+    .btn-review-login {
+        display: inline-block;
+        padding: 11px 22px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-review-register {
+        background: #173b6c;
+        color: #fff;
+    }
+
+    .btn-review-register:hover {
+        background: #245b9c;
+        color: #fff;
+    }
+
+    .btn-review-login {
+        background: #e9f0f8;
+        color: #173b6c;
+    }
+
+    .btn-review-login:hover {
+        background: #d8e6f5;
+        color: #173b6c;
+    }
+
+</style>

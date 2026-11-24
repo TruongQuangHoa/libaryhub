@@ -1,0 +1,218 @@
+
+@model IEnumerable<LibraryHub.Models.tblPublisher>
+
+@{
+    ViewData["Title"] = "Quản lý nhà xuất bản";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h2>Quản lý nhà xuất bản</h2>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">
+                        Trang chủ
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">
+                    Nhà xuất bản
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 mt-3">
+                            <h5 class="card-title mb-0">
+                                Danh sách nhà xuất bản
+                            </h5>
+
+                            <a asp-area="Admin"
+                               asp-controller="Publisher"
+                               asp-action="Create"
+                               class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i>
+                                Thêm nhà xuất bản
+                            </a>
+                        </div>
+
+                        @if (TempData["Success"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show"
+                                 role="alert">
+                                <i class="bi bi-check-circle me-1"></i>
+                                @TempData["Success"]
+
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                        aria-label="Close">
+                                </button>
+                            </div>
+                        }
+
+                        @if (TempData["Error"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show"
+                                 role="alert">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                @TempData["Error"]
+
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                        aria-label="Close">
+                                </button>
+                            </div>
+                        }
+
+                        <div class="table-responsive">
+                            <table class="table table-borderless datatable align-middle">
+
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>STT</th>
+                                        <th>Tên nhà xuất bản</th>
+                                        <th>Địa chỉ</th>
+                                        <th>Điện thoại</th>
+                                        <th>Email</th>
+                                        <th>Website</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        int stt = 1;
+
+                                        foreach (var item in Model)
+                                        {
+                                            <tr class="text-center">
+                                                <td>@stt</td>
+
+                                                <td class="text-start text-primary">
+                                                    <strong>@item.PublisherName</strong>
+                                                </td>
+
+                                                <td class="text-start">
+                                                    @(string.IsNullOrWhiteSpace(item.Address)
+                                                        ? "Chưa cập nhật"
+                                                        : item.Address)
+                                                </td>
+
+                                                <td>
+                                                    @(string.IsNullOrWhiteSpace(item.Phone)
+                                                        ? "Chưa cập nhật"
+                                                        : item.Phone)
+                                                </td>
+
+                                                <td>
+                                                    @(string.IsNullOrWhiteSpace(item.Email)
+                                                        ? "Chưa cập nhật"
+                                                        : item.Email)
+                                                </td>
+
+                                                <td>
+                                                    @if (!string.IsNullOrWhiteSpace(item.Website))
+                                                    {
+                                                        <a href="@item.Website"
+                                                           target="_blank"
+                                                           rel="noopener noreferrer"
+                                                           title="Truy cập website">
+                                                            <i class="bi bi-globe"></i>
+                                                            Xem website
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">
+                                                            Chưa cập nhật
+                                                        </span>
+                                                    }
+                                                </td>
+
+                                                <td>
+                                                    <form asp-area="Admin"
+                                                          asp-controller="Publisher"
+                                                          asp-action="ToggleStatus"
+                                                          method="post">
+
+                                                        @Html.AntiForgeryToken()
+
+                                                        <input type="hidden"
+                                                               name="id"
+                                                               value="@item.PublisherID" />
+
+                                                        <div class="form-check form-switch d-flex justify-content-center">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                   role="switch"
+                                                                   checked="@item.IsActive"
+                                                                   onchange="this.form.submit()"
+                                                                   title="Thay đổi trạng thái" />
+                                                        </div>
+                                                    </form>
+                                                </td>
+
+                                                <td>
+                                                    <div class="d-flex justify-content-center gap-1">
+
+                                                        <a asp-area="Admin"
+                                                           asp-controller="Publisher"
+                                                           asp-action="Edit"
+                                                           asp-route-id="@item.PublisherID"
+                                                           class="btn btn-warning btn-sm"
+                                                           title="Chỉnh sửa">
+                                                            <i class="bi bi-pencil-square"></i>
+                                                        </a>
+
+                                                        <a asp-area="Admin"
+                                                           asp-controller="Publisher"
+                                                           asp-action="Delete"
+                                                           asp-route-id="@item.PublisherID"
+                                                           class="btn btn-danger btn-sm"
+                                                           title="Xóa">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            stt++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="9"
+                                                class="text-center text-muted py-4">
+                                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                                Chưa có dữ liệu nhà xuất bản.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main>

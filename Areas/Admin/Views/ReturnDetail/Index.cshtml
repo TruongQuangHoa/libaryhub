@@ -1,0 +1,147 @@
+@using LibraryHub.Models
+@model IList<tblReturnDetail>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách chi tiết phiếu trả</h2>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body mt-4">
+
+                        <table class="table table-borderless datatable">
+                            <thead>
+                                <tr>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-2 text-center">Phiếu trả</th>
+                                    <th class="col-3 text-center">Sách</th>
+                                    <th class="col-1 text-center">Ngày trả</th>
+                                    <th class="col-1 text-center">Quá hạn (ngày)</th>
+                                    <th class="col-1 text-center">Phạt quá hạn</th>
+                                    <th class="col-1 text-center">Phạt mất/hỏng</th>
+                                    <th class="col-1 text-center">Hỏng?</th>
+                                    <th class="col-1 text-center">Trạng thái</th>
+                                    <th class="col-1 text-center">Chức năng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int stt = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    stt++;
+                                    <tr>
+                                        <td class="text-center">@stt</td>
+                                        <td class="text-center">
+                                            <a asp-area="Admin" asp-controller="Return"
+                                                asp-route-id="@item.ReturnID">
+                                                <strong>#@item.ReturnID</strong><br />
+                                                <small>@item._return?.borrowing?.patron?.PatronName</small>
+                                            </a>
+                                        </td>
+
+                                        <!-- Thông tin sách -->
+                                        <td class="text-left">
+                                            <strong>@item.book?.TitleBook</strong><br />
+                                            <small class="text-muted">
+                                                Thể loại: @(item.book?.category?.CategoryName ?? "N/A")
+                                            </small>
+                                        </td>
+
+                                        <!-- Ngày trả -->
+                                        <td class="text-center">
+                                            @item._return?.ReturnDate?.ToString("dd/MM/yyyy HH:mm")
+                                        </td>
+
+                                        <!-- Số ngày quá hạn -->
+                                        <td class="text-center">
+                                            @if (item.OverdueDays > 0)
+                                            {
+                                                <span class="badge bg-danger">@item.OverdueDays ngày</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">0</span>
+                                            }
+                                        </td>
+
+                                        <!-- Phạt quá hạn -->
+                                        <td class="text-center">
+                                            <span class="badge bg-warning">
+                                                @item.OverdueFine.ToString("N0") VNĐ
+                                            </span>
+                                        </td>
+
+                                        <!-- Phạt mất/hỏng -->
+                                        <td class="text-center">
+                                            @if (item.LostFine > 0)
+                                            {
+                                                <span class="badge bg-danger">
+                                                    @item.LostFine.ToString("N0") VNĐ
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">0 VNĐ</span>
+                                            }
+                                        </td>
+
+                                        <!-- Trạng thái hỏng -->
+                                        <td class="text-center">
+                                            @if (item.IsDamaged)
+                                            {
+                                                <span class="badge bg-danger">Có hỏng</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Bình thường</span>
+                                            }
+                                        </td>
+
+                                        <!-- Trạng thái active -->
+                                        <td class="text-center">
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="badge bg-success">Hoạt động</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Đã hủy</span>
+                                            }
+                                        </td>
+
+                                        <!-- Chức năng -->
+                                        <td class="text-center">
+                                            <a asp-area="Admin" asp-controller="ReturnDetail" asp-action="Edit"
+                                                asp-route-id="@item.ReturnDetailID" class="btn btn-primary btn-sm"
+                                                title="Chỉnh sửa">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+
+                                @if (!Model.Any())
+                                {
+                                    <tr>
+                                        <td colspan="10" class="text-center text-muted py-4">
+                                            Chưa có chi tiết phiếu trả nào.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

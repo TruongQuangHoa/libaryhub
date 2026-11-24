@@ -1,0 +1,158 @@
+@model List<LibraryHub.Models.BorrowingCartItem>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Phiếu mượn sách";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="section-title" data-aos="fade-up">
+        <h2>Phiếu mượn sách</h2>
+        <p>Kiểm tra danh sách sách bạn đã chọn trước khi xác nhận mượn.</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Hình ảnh</th>
+                                <th>Tên sách</th>
+                                <th class="text-center">Phí mượn</th>
+                                <th class="text-center" style="width: 100px;">Số lượng</th>
+                                <th class="text-center">Thành tiền</th>
+                                <th class="text-center pe-4">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <img src="@item.ImageUrl" alt="@item.Title" class="rounded shadow-sm"
+                                            style="width:70px; height:90px; object-fit:cover;" />
+                                    </td>
+                                    <td>
+                                        <h6 class="mb-0 fw-bold text-dark">@item.Title</h6>
+                                        <small class="text-muted">Mã sách: #@item.BookID</small>
+                                    </td>
+                                    <td class="text-center text-primary fw-medium">
+                                        @item.BorrowingFee.ToString("N0") <small>VNĐ</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border p-2">@item.Quantity</span>
+                                    </td>
+                                    <td class="text-center fw-bold">
+                                        @((item.BorrowingFee * item.Quantity).ToString("N0")) <small>VNĐ</small>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <a asp-controller="BorrowingCart" asp-action="Remove" asp-route-bookId="@item.BookID"
+                                            class="btn btn-outline-danger btn-sm rounded-pill"
+                                            onclick="return confirm('Bạn có chắc muốn xóa sách này?')">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <a href="/" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Tiếp tục chọn sách
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h4 class="mb-0">Tổng phí mượn: <span class="text-primary fw-bold">@ViewBag.TotalFee.ToString("N0")
+                                VNĐ</span></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mt-4" data-aos="fade-up">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0" style="color: #fff;"><i class="bi bi-calendar-check me-2"></i>Thông tin thời gian mượn</h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="BorrowingCart" asp-action="ConfirmBorrowing" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ngày giờ mượn</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                <input type="text" value="@DateTime.Now.ToString("dd/MM/yyyy HH:mm")"
+                                    class="form-control bg-light" readonly />
+                                <input type="hidden" name="borrowDate" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                            </div>
+                            <small class="text-muted">Hệ thống ghi nhận thời gian thực hiện tại.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ngày giờ trả dự kiến</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                                <input type="datetime-local" name="dueDate"
+                                    min="@DateTime.Now.AddHours(1).ToString("yyyy-MM-ddTHH:mm")" class="form-control"
+                                    required />
+                            </div>
+                            <small class="text-muted">Vui lòng chọn ngày và giờ cụ thể bạn sẽ trả sách.</small>
+                        </div>
+                        <div class="col-12 text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow">
+                                <i class="bi bi-check2-circle"></i> Xác nhận mượn sách
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 shadow-sm rounded bg-white" data-aos="zoom-in">
+            <div class="mb-4">
+                <i class="bi bi-cart-x text-muted" style="font-size: 5rem;"></i>
+            </div>
+            <h3 class="fw-bold">Giỏ mượn đang trống</h3>
+            <p class="text-muted">Có vẻ như bạn chưa chọn cuốn sách nào để mượn.</p>
+            <a href="/" class="btn btn-primary btn-lg mt-3 px-4 rounded-pill">
+                <i class="bi bi-search"></i> Khám phá kho sách ngay
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Tự động đóng thông báo sau 5 giây
+        window.setTimeout(function () {
+            $(".alert").fadeTo(500, 0).slideUp(500, function () {
+                $(this).remove();
+            });
+        }, 5000);
+    </script>
+}

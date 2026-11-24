@@ -1,0 +1,590 @@
+﻿@{
+  Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>LibraryHub</title>
+
+  @await RenderSectionAsync("Meta", required: false)
+
+  @await RenderSectionAsync("Styles", required: false)
+
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="~/assets/img/favicon.png" rel="icon">
+  <link href="~/assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+
+  <link
+  href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap"
+  rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="~/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="~/assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="~/assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="~/assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="~/assets/css/main.css" rel="stylesheet">
+
+  <style>
+      /* =========================================================
+                   CSS CHO PHẦN NGƯỜI DÙNG ĐĂNG NHẬP
+                   ========================================================= */
+
+      /* Container chính của Dropdown */
+      .user-profile-nav {
+        margin-left: 20px;
+      }
+
+      /* Nút Toggle */
+      .user-profile-nav .user-toggle {
+        color: #fff;
+        padding: 8px 10px;
+        border-radius: 50px;
+        transition: background-color 0.3s;
+        cursor: pointer;
+      }
+
+      .user-profile-nav .user-toggle:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+
+      /* Icon mũi tên */
+      .user-profile-nav .toggle-icon {
+        font-size: 10px;
+        margin-left: 5px;
+        transition: transform 0.3s;
+      }
+
+      /* Dropdown Menu */
+      .user-dropdown-menu {
+        display: none;
+        z-index: 1050;
+        top: 100%;
+        min-width: 200px;
+        padding: 0;
+        margin-top: 10px;
+        background-color: #fff;
+        list-style: none;
+      }
+
+      /* Hiển thị Dropdown */
+      .user-dropdown-menu.show {
+        display: block;
+      }
+
+      /* Header Dropdown */
+      .user-dropdown-menu .dropdown-header {
+        padding: 10px 15px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .user-dropdown-menu .dropdown-header h6 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 0;
+        color: #333;
+      }
+
+      .user-dropdown-menu .dropdown-header span {
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      /* Các mục Dropdown */
+      .user-dropdown-menu li a {
+        padding: 10px 15px;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.2s;
+      }
+
+      .user-dropdown-menu li a:hover {
+        background-color: #f1f1f1;
+      }
+
+      .user-dropdown-menu .dropdown-divider {
+        margin: 5px 0;
+        border-top: 1px solid #dee2e6;
+      }
+
+      /* =========================================================
+                   ADMIN ONLY
+                   Các phần có class này sẽ bị ẩn khi đang ở Patron Preview
+                   ========================================================= */
+
+      .admin-only {
+        transition: none !important;
+      }
+
+      body.patron-preview .admin-only {
+        display: none !important;
+      }
+
+      /* =========================================================
+         PATRON PREVIEW
+         ========================================================= */
+
+      /* Ẩn tất cả thành phần Admin */
+      html[data-patron-preview="true"] .admin-only {
+        display: none !important;
+      }
+
+      /* Hiện giao diện khách */
+      html[data-patron-preview="true"] .patron-guest-only {
+        display: flex !important;
+      }
+
+      /* Ẩn giao diện tài khoản Patron thật trong Preview */
+      html[data-patron-preview="true"] .patron-user-only {
+        display: none !important;
+      }
+  </style>
+
+  <script>
+      (function () {
+
+        const url = new URL(window.location.href);
+
+        // Lần đầu Admin mở Patron Preview
+        if (url.searchParams.get("clear_cache") === "1") {
+
+          sessionStorage.setItem(
+            "PatronPreview",
+            "true"
+          );
+
+          // Xóa query khỏi URL
+          window.history.replaceState(
+            {},
+            document.title,
+            url.pathname + url.hash
+          );
+        }
+
+        // Kiểm tra trạng thái Preview của tab hiện tại
+        if (sessionStorage.getItem("PatronPreview") === "true") {
+
+          document.documentElement.setAttribute(
+            "data-patron-preview",
+            "true"
+          );
+        }
+
+      })();
+  </script>
+
+</head>
+
+<body class="index-page">
+
+  <!-- =========================================================
+         BEGIN MENU
+         ========================================================= -->
+
+  @await Component.InvokeAsync("MenuView")
+
+  <!-- =========================================================
+         END MENU
+         ========================================================= -->
+
+
+  <!-- =========================================================
+         BEGIN MAIN
+         ========================================================= -->
+
+  <main id="main" class="main">
+
+    <div class="container">
+      @RenderBody()
+    </div>
+
+  </main>
+
+  <!-- =========================================================
+         END MAIN
+         ========================================================= -->
+
+
+  <!-- =========================================================
+         BEGIN FOOTER
+         ========================================================= -->
+
+  <footer id="footer" class="footer accent-background">
+
+    <div class="container footer-top">
+
+      <div class="row gy-4">
+
+        <!-- Footer About -->
+        <div class="col-lg-5 col-md-12 footer-about">
+
+          <a href="/" class="logo d-flex align-items-center">
+            <span class="sitename">LibraryHub</span>
+          </a>
+
+          <p>
+            Khám phá tri thức – Mở rộng tương lai cùng thư viện số hiện đại.
+            Chúng tôi cung cấp hàng ngàn đầu sách chất lượng thuộc nhiều lĩnh vực khác nhau.
+          </p>
+
+          <div class="social-links d-flex mt-4">
+
+            <a href="#">
+              <i class="bi bi-twitter-x"></i>
+            </a>
+
+            <a href="#">
+              <i class="bi bi-facebook"></i>
+            </a>
+
+            <a href="#">
+              <i class="bi bi-instagram"></i>
+            </a>
+
+            <a href="#">
+              <i class="bi bi-linkedin"></i>
+            </a>
+
+          </div>
+
+        </div>
+
+
+        <!-- Footer Links -->
+        <div class="col-lg-2 col-6 footer-links">
+
+          <h4>Liên kết hữu ích</h4>
+
+          <ul>
+
+            <li>
+              <a href="/">Trang chủ</a>
+            </li>
+
+            <li>
+              <a href="#">Danh mục sách</a>
+            </li>
+
+            <li>
+              <a href="#">Giới thiệu</a>
+            </li>
+
+            <li>
+              <a href="#">Liên hệ</a>
+            </li>
+
+          </ul>
+
+        </div>
+
+
+        <!-- Footer Services -->
+        <div class="col-lg-2 col-6 footer-links">
+
+          <h4>Dịch vụ của chúng tôi</h4>
+
+          <ul>
+
+            <li>
+              <a href="#">Đăng ký mượn sách</a>
+            </li>
+
+            <li>
+              <a href="#">Không gian học tập</a>
+            </li>
+
+            <li>
+              <a href="#">Hỗ trợ độc giả</a>
+            </li>
+
+          </ul>
+
+        </div>
+
+
+        <!-- Footer Contact -->
+        <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+
+          <h4>Liên hệ với chúng tôi</h4>
+
+          <p>182 Lê Lợi, Phường Trường Vinh</p>
+
+          <p>Nghệ An, Việt Nam</p>
+
+          <p class="mt-4">
+            <strong>Điện thoại:</strong>
+            <span>+84 123 456 789</span>
+          </p>
+
+          <p>
+            <strong>Email:</strong>
+            <span>support@libraryhub.vn</span>
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="container copyright text-center mt-4">
+
+      <p>
+        ©
+        <span>Copyright</span>
+
+        <strong class="px-1 sitename">
+          LibraryHub
+        </strong>
+      </p>
+
+      <div class="credits">
+
+        Thiết kế bởi
+        <a href="#">
+          Nhóm dự án LibraryHub
+        </a>
+
+      </div>
+
+    </div>
+
+  </footer>
+
+  <!-- =========================================================
+         END FOOTER
+         ========================================================= -->
+
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+
+  <!-- =========================================================
+         VENDOR JS
+         ========================================================= -->
+
+  <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <script src="~/assets/vendor/php-email-form/validate.js"></script>
+
+  <script src="~/assets/vendor/aos/aos.js"></script>
+
+  <script src="~/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+  <script src="~/assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+
+  <!-- Main JS -->
+  <script src="~/assets/js/main.js"></script>
+
+  <!-- jQuery -->
+  <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+  <!-- =========================================================
+         PATRON PREVIEW MODE
+         ========================================================= -->
+
+  <script>
+
+      (function () {
+
+        /*
+        * =====================================================
+        * KIỂM TRA URL
+        * =====================================================
+        *
+        * Admin mở:
+        *
+        * /?clear_cache=1
+        *
+        * thì chuyển tab này sang Patron Preview.
+        */
+
+        const currentUrl = new URL(window.location.href);
+
+        const clearCache =
+          currentUrl.searchParams.get("clear_cache");
+
+
+        /*
+        * =====================================================
+        * NẾU CÓ clear_cache=1
+        * =====================================================
+        */
+
+        if (clearCache === "1") {
+
+          /*
+          * Lưu trạng thái vào sessionStorage.
+          *
+          * sessionStorage chỉ tồn tại trong TAB hiện tại.
+          *
+          * Vì vậy:
+          *
+          * TAB ADMIN
+          *     ↓
+          * không bị ảnh hưởng
+          *
+          * TAB PATRON
+          *     ↓
+          * PatronPreview = true
+          */
+
+          sessionStorage.setItem(
+            "PatronPreview",
+            "true"
+          );
+
+
+          /*
+          * Xóa ?clear_cache=1 khỏi URL.
+          *
+          * Ví dụ:
+          *
+          * /?clear_cache=1
+          *
+          * thành:
+          *
+          * /
+          *
+          * Không reload trang.
+          */
+
+          const cleanUrl =
+            currentUrl.pathname +
+            currentUrl.hash;
+
+          window.history.replaceState(
+            {},
+            document.title,
+            cleanUrl
+          );
+        }
+
+
+        /*
+        * =====================================================
+        * KIỂM TRA PATRON PREVIEW
+        * =====================================================
+        */
+
+        const isPatronPreview =
+          sessionStorage.getItem("PatronPreview") === "true";
+
+
+        /*
+        * =====================================================
+        * THÊM CLASS VÀO BODY
+        * =====================================================
+        *
+        * Nếu là Patron Preview:
+        *
+        * <body class="index-page patron-preview">
+        *
+        * CSS sẽ tự động ẩn .admin-only
+        */
+
+        if (isPatronPreview) {
+
+          document.body.classList.add(
+            "patron-preview"
+          );
+
+        }
+
+      })();
+
+  </script>
+
+  <script>
+      document.addEventListener("DOMContentLoaded", function () {
+
+        const isPatronPreview =
+          sessionStorage.getItem("PatronPreview") === "true";
+
+        if (!isPatronPreview) {
+          return;
+        }
+
+
+        // ==============================================
+        // ẨN TOÀN BỘ KHU VỰC ADMIN
+        // ==============================================
+
+        document
+          .querySelectorAll(".admin-only")
+          .forEach(function (element) {
+
+            element.style.display = "none";
+
+          });
+
+
+        // ==============================================
+        // ẨN TÀI KHOẢN PATRON THẬT
+        // ==============================================
+
+        document
+          .querySelectorAll(".patron-user-only")
+          .forEach(function (element) {
+
+            element.style.display = "none";
+
+          });
+
+
+        // ==============================================
+        // HIỆN LOGIN / REGISTER
+        // ==============================================
+
+        const guestActions =
+          document.getElementById(
+            "patron-guest-actions"
+          );
+
+        if (guestActions) {
+
+          guestActions.style.display = "flex";
+
+        }
+
+      });
+  </script>
+
+
+  <!-- =========================================================
+         RENDER SECTION
+         ========================================================= -->
+
+  @RenderSection("Scripts", required: false)
+
+  @await Html.PartialAsync("_ChatWidget")
+
+<link rel="stylesheet"
+      href="~/assets/css/chatbot.css"
+      asp-append-version="true" />
+
+<script src="~/assets/js/chatbot.js"
+        asp-append-version="true"></script>
+
+</body>
+
+</html>

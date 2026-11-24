@@ -1,0 +1,563 @@
+
+@using LibraryHub.Models
+@model tblPost
+
+@{
+    ViewData["Title"] = ViewBag.MetaTitle ?? Model.Title;
+
+    var relatedPosts = ViewBag.RelatedPosts as IList<tblPost>
+        ?? new List<tblPost>();
+}
+
+@section Meta {
+    <meta name="description"
+          content="@ViewBag.MetaDescription" />
+
+    <meta property="og:title"
+          content="@Model.Title" />
+
+    <meta property="og:description"
+          content="@Model.Summary" />
+
+    @if (!string.IsNullOrEmpty(Model.Thumbnail))
+    {
+        <meta property="og:image"
+              content="@Model.Thumbnail" />
+    }
+}
+
+<section class="post-detail-page">
+
+    <!-- BREADCRUMB -->
+    <div class="post-breadcrumb">
+        <div class="container">
+            <a asp-controller="Home" asp-action="Index">
+                Trang chủ
+            </a>
+
+            <i class="bi bi-chevron-right"></i>
+
+            <span>Bài viết</span>
+
+            <i class="bi bi-chevron-right"></i>
+
+            <span class="breadcrumb-current">
+                @Model.Title
+            </span>
+        </div>
+    </div>
+
+    <!-- HEADER BÀI VIẾT -->
+    <div class="post-detail-container">
+
+        <header class="post-detail-header">
+
+            @if (!string.IsNullOrWhiteSpace(Model.Category))
+            {
+                <span class="detail-category">
+                    @Model.Category
+                </span>
+            }
+
+            <h1>@Model.Title</h1>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Summary))
+            {
+                <p class="detail-summary">
+                    @Model.Summary
+                </p>
+            }
+
+            <div class="detail-meta">
+
+                <div class="detail-author">
+                    @if (!string.IsNullOrEmpty(Model.AuthorAvatar))
+                    {
+                        <img src="@Model.AuthorAvatar"
+                             alt="@Model.AuthorName" />
+                    }
+                    else
+                    {
+                        <div class="detail-author-placeholder">
+                            <i class="bi bi-person"></i>
+                        </div>
+                    }
+
+                    <div>
+                        <strong>
+                            @(Model.AuthorName ?? "Thư viện")
+                        </strong>
+
+                        <small>Tác giả bài viết</small>
+                    </div>
+                </div>
+
+                <div class="detail-meta-item">
+                    <i class="bi bi-calendar3"></i>
+                    @(Model.PublishedDate?.ToString("dd/MM/yyyy"))
+                </div>
+
+                <div class="detail-meta-item">
+                    <i class="bi bi-eye"></i>
+                    @Model.ViewCount lượt xem
+                </div>
+
+            </div>
+        </header>
+
+        <!-- ẢNH BÌA -->
+        @if (!string.IsNullOrEmpty(Model.Thumbnail))
+        {
+            <div class="detail-cover">
+                <img src="@Model.Thumbnail"
+                     alt="@Model.Title" />
+            </div>
+        }
+
+        <!-- NỘI DUNG -->
+        <div class="post-detail-layout">
+
+            <main class="post-detail-content">
+
+                <div class="content-label">
+                    <span></span>
+                    NỘI DUNG BÀI VIẾT
+                </div>
+
+                <div class="article-content">
+                    @Html.Raw(Model.Content)
+                </div>
+
+                <div class="article-bottom">
+                    <div class="article-bottom-line"></div>
+
+                    <p>
+                        Cảm ơn bạn đã quan tâm và theo dõi
+                        các bài viết của thư viện.
+                    </p>
+                </div>
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="back-home">
+                    <i class="bi bi-arrow-left"></i>
+                    Quay lại trang chủ
+                </a>
+
+            </main>
+
+            <!-- SIDEBAR -->
+            <aside class="post-detail-sidebar">
+
+                <div class="sidebar-card">
+                    <div class="sidebar-icon">
+                        <i class="bi bi-book-half"></i>
+                    </div>
+
+                    <h3>Khám phá thư viện</h3>
+
+                    <p>
+                        Cùng tìm hiểu thêm những cuốn sách,
+                        hoạt động và thông tin hữu ích tại thư viện.
+                    </p>
+
+                    <a asp-controller="Home"
+                       asp-action="Index">
+                        Khám phá ngay
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+
+                @if (relatedPosts.Any())
+                {
+                    <div class="related-posts">
+                        <h3>Bài viết liên quan</h3>
+
+                        @foreach (var item in relatedPosts)
+                        {
+                            <a asp-controller="Post"
+                               asp-action="Details"
+                               asp-route-slug="@item.Slug"
+                               asp-route-id="@item.PostID"
+                               class="related-post-item">
+
+                                @if (!string.IsNullOrEmpty(item.Thumbnail))
+                                {
+                                    <img src="@item.Thumbnail"
+                                         alt="@item.Title" />
+                                }
+
+                                <div>
+                                    <h4>@item.Title</h4>
+
+                                    <small>
+                                        @item.PublishedDate?.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+
+            </aside>
+
+        </div>
+
+    </div>
+</section>
+
+<style>
+    .post-detail-page {
+        background: #fff;
+        padding-bottom: 80px;
+    }
+
+    .post-breadcrumb {
+        padding: 22px 0;
+        border-bottom: 1px solid #edf0f4;
+        background: #fafbfd;
+    }
+
+    .post-breadcrumb .container {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 13px;
+        color: #8994a3;
+    }
+
+    .post-breadcrumb a {
+        color: #4776a8;
+        text-decoration: none;
+    }
+
+    .breadcrumb-current {
+        color: #344b69;
+        font-weight: 600;
+    }
+
+    .post-detail-container {
+        max-width: 1140px;
+        padding: 0 20px;
+        margin: 0 auto;
+    }
+
+    .post-detail-header {
+        max-width: 900px;
+        margin: 65px auto 40px;
+        text-align: center;
+    }
+
+    .detail-category {
+        display: inline-block;
+        padding: 8px 17px;
+        border-radius: 30px;
+        background: #edf5ff;
+        color: #2769ad;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 22px;
+    }
+
+    .post-detail-header h1 {
+        color: #243c5a;
+        font-size: clamp(30px, 4vw, 45px);
+        line-height: 1.25;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 22px;
+    }
+
+    .detail-summary {
+        max-width: 760px;
+        margin: 0 auto;
+        color: #748094;
+        font-size: 18px;
+        line-height: 1.8;
+    }
+
+    .detail-meta {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 28px;
+        margin-top: 30px;
+    }
+
+    .detail-author {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        text-align: left;
+    }
+
+    .detail-author img,
+    .detail-author-placeholder {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .detail-author-placeholder {
+        display: grid;
+        place-items: center;
+        background: #edf3fa;
+        color: #37618f;
+        font-size: 22px;
+    }
+
+    .detail-author strong,
+    .detail-author small {
+        display: block;
+    }
+
+    .detail-author strong {
+        color: #344b69;
+        font-size: 13px;
+    }
+
+    .detail-author small {
+        color: #9aa3af;
+        margin-top: 4px;
+        font-size: 11px;
+    }
+
+    .detail-meta-item {
+        color: #8591a1;
+        font-size: 13px;
+    }
+
+    .detail-meta-item i {
+        color: #3478bd;
+        margin-right: 5px;
+    }
+
+    .detail-cover {
+        width: 100%;
+        max-height: 560px;
+        overflow: hidden;
+        border-radius: 18px;
+        margin-bottom: 65px;
+        background: #f1f4f8;
+        box-shadow: 0 15px 45px rgba(29, 48, 73, .10);
+    }
+
+    .detail-cover img {
+        display: block;
+        width: 100%;
+        max-height: 560px;
+        object-fit: cover;
+    }
+
+    .post-detail-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 285px;
+        gap: 65px;
+        align-items: start;
+    }
+
+    .post-detail-content {
+        min-width: 0;
+    }
+
+    .content-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        color: #3478bd;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+    }
+
+    .content-label span {
+        width: 30px;
+        height: 3px;
+        background: #3478bd;
+        border-radius: 5px;
+    }
+
+    .article-content {
+        color: #455468;
+        font-size: 17px;
+        line-height: 1.95;
+        overflow-wrap: anywhere;
+    }
+
+    .article-content h2 {
+        color: #243c5a;
+        font-size: 27px;
+        line-height: 1.4;
+        font-weight: 750;
+        margin: 40px 0 18px;
+    }
+
+    .article-content h3 {
+        color: #2e4e72;
+        font-size: 21px;
+        font-weight: 700;
+        margin: 30px 0 14px;
+    }
+
+    .article-content p {
+        margin-bottom: 22px;
+    }
+
+    .article-content img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 30px auto;
+        border-radius: 12px;
+    }
+
+    .article-content ul,
+    .article-content ol {
+        padding-left: 25px;
+        margin-bottom: 25px;
+    }
+
+    .article-content blockquote {
+        margin: 30px 0;
+        padding: 22px 28px;
+        background: #f3f7fc;
+        border-left: 4px solid #3478bd;
+        border-radius: 0 10px 10px 0;
+        color: #526b88;
+    }
+
+    .article-bottom {
+        margin-top: 50px;
+        text-align: center;
+        color: #8793a2;
+        font-size: 14px;
+    }
+
+    .article-bottom-line {
+        width: 65px;
+        height: 3px;
+        margin: 0 auto 20px;
+        background: #3478bd;
+        border-radius: 5px;
+    }
+
+    .back-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 30px;
+        padding: 12px 20px;
+        border: 1px solid #dce6f1;
+        border-radius: 8px;
+        color: #315d8b;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 650;
+        transition: .25s;
+    }
+
+    .back-home:hover {
+        color: #fff;
+        background: #315d8b;
+        border-color: #315d8b;
+    }
+
+    .post-detail-sidebar {
+        position: sticky;
+        top: 25px;
+    }
+
+    .sidebar-card {
+        padding: 27px 23px;
+        background: linear-gradient(145deg, #f2f7fd, #fff);
+        border: 1px solid #e7edf5;
+        border-radius: 14px;
+        margin-bottom: 30px;
+    }
+
+    .sidebar-icon {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        background: #e2efff;
+        color: #3478bd;
+        border-radius: 12px;
+        font-size: 23px;
+        margin-bottom: 18px;
+    }
+
+    .sidebar-card h3,
+    .related-posts h3 {
+        color: #263f60;
+        font-size: 18px;
+        font-weight: 750;
+        margin-bottom: 12px;
+    }
+
+    .sidebar-card p {
+        color: #7b8797;
+        font-size: 13px;
+        line-height: 1.8;
+    }
+
+    .sidebar-card a {
+        display: inline-block;
+        margin-top: 10px;
+        color: #3478bd;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .related-posts {
+        padding: 24px 20px;
+        border: 1px solid #edf0f4;
+        border-radius: 14px;
+    }
+
+    .related-post-item {
+        display: flex;
+        gap: 12px;
+        padding: 15px 0;
+        border-bottom: 1px solid #edf0f4;
+        text-decoration: none;
+    }
+
+    .related-post-item:last-child {
+        border-bottom: none;
+    }
+
+    .related-post-item img {
+        width: 75px;
+        height: 65px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .related-post-item h4 {
+        color: #344b69;
+        font-size: 13px;
+        line-height: 1.5;
+        font-weight: 650;
+        margin: 0 0 7px;
+    }
+
+    .related-post-item:hover h4 {
+        color: #3478bd;
+    }
+
+    .related-post-item small {
+        color: #929baa;
+        font-size: 11px;
+    }
+
+    
+</style>

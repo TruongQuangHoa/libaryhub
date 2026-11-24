@@ -1,0 +1,279 @@
+
+@model IEnumerable<LibraryHub.Models.tblAuthor>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Danh sách tác giả";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách tác giả</h2>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                </li>
+                <li class="breadcrumb-item active">Tác giả</li>
+            </ol>
+        </nav>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ImportSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i>
+            @TempData["ImportSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ImportError"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>
+                <i class="bi bi-exclamation-triangle"></i>
+                @TempData["ImportError"]
+            </strong>
+
+            @if (TempData["ImportDetails"] != null)
+            {
+                <hr />
+                <div style="white-space: pre-line;">@TempData["ImportDetails"]</div>
+            }
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3 mb-3">
+                            <h5 class="card-title mb-0">Thông tin tác giả</h5>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <a asp-area="Admin"
+                                   asp-controller="Author"
+                                   asp-action="DownloadExcelTemplate"
+                                   class="btn btn-success">
+                                    <i class="bi bi-file-earmark-excel"></i>
+                                    Tải file Excel mẫu
+                                </a>
+
+                                <a asp-area="Admin"
+                                   asp-controller="Author"
+                                   asp-action="Create"
+                                   class="btn btn-primary">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Thêm tác giả
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- NHẬP EXCEL -->
+                        <div class="card border mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-file-earmark-spreadsheet text-success"></i>
+                                    Nhập danh sách tác giả từ Excel
+                                </h5>
+
+                                <form asp-area="Admin"
+                                      asp-controller="Author"
+                                      asp-action="ImportExcel"
+                                      method="post"
+                                      enctype="multipart/form-data">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <div class="row align-items-end">
+                                        <div class="col-md-8 mb-3">
+                                            <label class="form-label">Chọn file Excel (.xlsx)</label>
+                                            <input type="file"
+                                                   name="excelFile"
+                                                   class="form-control"
+                                                   accept=".xlsx"
+                                                   required />
+
+                                            <small class="text-muted">
+                                                Chỉ hỗ trợ file .xlsx, dung lượng tối đa 10MB.
+                                                Vui lòng tải file mẫu trước khi nhập dữ liệu.
+                                            </small>
+                                        </div>
+
+                                        <div class="col-md-4 mb-3">
+                                            <button type="submit" class="btn btn-success w-100">
+                                                <i class="bi bi-upload"></i>
+                                                Nhập dữ liệu Excel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- DANH SÁCH TÁC GIẢ -->
+                        <div class="table-responsive">
+                            <table class="table table-borderless datatable align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Mã</th>
+                                        <th class="text-center">Ảnh</th>
+                                        <th class="text-center">Họ và tên</th>
+                                        <th class="text-center">Nhà xuất bản</th>
+                                        <th class="text-center">Ngày sinh</th>
+                                        <th class="text-center">Giới tính</th>
+                                        <th class="text-center">Quốc tịch</th>
+                                        <th class="text-center">Chuyên môn</th>
+                                        <th class="text-center">Số đầu sách</th>
+                                        <th class="text-center">Lượt độc giả</th>
+                                        <th class="text-center">Trạng thái</th>
+                                        <th class="text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @{
+                                        int stt = 0;
+                                    }
+
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            stt++;
+
+                                            <tr>
+                                                <td class="text-center">@stt</td>
+
+                                                <td class="text-center">
+                                                    @if (!string.IsNullOrWhiteSpace(item.ImageAuthor))
+                                                    {
+                                                        <img src="@item.ImageAuthor"
+                                                             alt="Ảnh @item.FullName"
+                                                             style="width:55px;height:65px;object-fit:cover;border-radius:6px;" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Chưa có ảnh</span>
+                                                    }
+                                                </td>
+
+                                                <td class="text-center text-primary">
+                                                    @item.FullName
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @if (item.Publisher != null)
+                                                    {
+                                                        <span class="badge bg-info text-dark">
+                                                            @item.Publisher.PublisherName
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Chưa xác định</span>
+                                                    }
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @(item.DateOfBirth.HasValue
+                                                        ? item.DateOfBirth.Value.ToString("dd/MM/yyyy")
+                                                        : "—")
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @(string.IsNullOrWhiteSpace(item.Gender) ? "—" : item.Gender)
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @(string.IsNullOrWhiteSpace(item.Nationality) ? "—" : item.Nationality)
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @(string.IsNullOrWhiteSpace(item.Specialization) ? "—" : item.Specialization)
+                                                </td>
+
+                                                <td class="text-center">@item.BookCount</td>
+
+                                                <td class="text-center">@item.TotalReaders.ToString("N0")</td>
+
+                                                <td class="text-center">
+                                                    <form asp-area="Admin"
+                                                          asp-controller="Author"
+                                                          asp-action="ToggleStatus"
+                                                          method="post">
+
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.AuthorID" />
+
+                                                        <div class="form-check form-switch d-flex justify-content-center">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                   checked="@item.IsActive"
+                                                                   onchange="this.form.submit()"
+                                                                   title="Bật/tắt trạng thái hiển thị" />
+                                                        </div>
+                                                    </form>
+                                                </td>
+
+                                                <td class="text-center text-nowrap">
+                                                    <a asp-area="Admin"
+                                                       asp-controller="Author"
+                                                       asp-action="Edit"
+                                                       asp-route-id="@item.AuthorID"
+                                                       class="btn btn-primary btn-sm"
+                                                       title="Chỉnh sửa tác giả">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+
+                                                    <a asp-area="Admin"
+                                                       asp-controller="Author"
+                                                       asp-action="Delete"
+                                                       asp-route-id="@item.AuthorID"
+                                                       class="btn btn-danger btn-sm"
+                                                       title="Xóa tác giả">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="12" class="text-center text-muted">
+                                                Chưa có dữ liệu tác giả.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

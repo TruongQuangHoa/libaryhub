@@ -1,0 +1,63 @@
+@using LibraryHub.Models;
+@using LibraryHub.Utilities;
+@model IList<viewBook>
+<section id="featured-courses" class="featured-courses section">
+    <!-- Section Title -->
+    <div class="container section-title" data-aos="fade-up">
+        <h2>Sách nổi bật</h2>
+        <p>Sách nổi bật là những cuốn sách được chọn vì nội dung hay và được nhiều người quan tâm</p>
+    </div><!-- End Section Title -->
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row gy-4">
+            @{
+                var books = Model.Take(10).ToList();
+                foreach (var t in books)
+                {
+                    string url = Functions.TitleSlugGeneration("book", t.TitleBook, t.BookID);
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="course-card">
+                            <div class="course-image">
+                                <img src="@t.ImageBook" alt="Book" class="img-fluid">
+                                <div class="badge featured">@t.CategoryName</div>
+                                <div class="price-badge">@t.PublicationYear</div>
+                            </div>
+                            <div class="course-content">
+                                <div class="course-meta">
+                                    <span class="level"><span>NXB:</span>@t.Publisher</span>
+                                    <span class="duration"><span>Còn lại:</span>@((t.BookQuantity - t.BorrowQuantity) > 0 ? (t.BookQuantity - t.BorrowQuantity) : 0) cuốn</span>
+                                </div>
+                                <h3>@t.TitleBook</h3>
+                                <p>@t.Description</p>
+                                <div class="instructor">
+                                    <div class="instructor-info">
+                                        <h6>@t.Author</h6>
+                                    </div>
+                                </div>
+                                <div class="course-stats">
+                                    <div class="rating">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
+                                        <span>(4.5)</span>
+                                    </div>
+                                    <div class="students">
+                                        <i class="bi bi-people-fill"></i>
+                                        <span>@t.TotalReaders độc giả</span>
+                                    </div>
+                                </div>
+                                <a href="/@url" class="btn-course">Đăng ký ngay</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            <!-- End Course Item -->
+        </div>
+        <div class="more-courses text-center" data-aos="fade-up" data-aos-delay="500">
+            <a href="#" class="btn-more">Xem thêm</a>
+        </div>
+
+</section>

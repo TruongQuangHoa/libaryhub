@@ -1,0 +1,251 @@
+@using System.Text.Json
+@{
+    var chatRole = User.IsInRole("Admin") ? "Admin"
+        : User.IsInRole("Librarian") ? "Librarian"
+        : User.IsInRole("Patron") ? "Patron"
+        : "Guest";
+
+    var area = (ViewContext.RouteData.Values["area"]?.ToString() ?? string.Empty).Trim();
+    var controller = (ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty).Trim();
+    var action = (ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty).Trim();
+    var inAdminArea = string.Equals(area, "Admin", StringComparison.OrdinalIgnoreCase);
+    var isAdminHome = inAdminArea
+        && string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)
+        && (string.IsNullOrEmpty(action) || string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase));
+    var isGuest = chatRole == "Guest";
+
+    string pageKey;
+    string pageName;
+    string subtitle;
+    string greeting;
+    string placeholder;
+    bool isMultipurpose = false;
+    var suggestions = new List<string>();
+
+    if (isGuest)
+    {
+        var c = controller.ToLowerInvariant();
+        (pageKey, pageName, subtitle, greeting, placeholder, suggestions) = c switch
+        {
+            "login" => ("guest-login", "Đăng nhập", "Trợ lý hỗ trợ đăng nhập",
+                "Xin chào! Tôi là trợ lý LibraryHub. Bạn đang ở trang đăng nhập. Tôi có thể hướng dẫn cách đăng nhập, khôi phục mật khẩu hoặc giới thiệu nhanh về thư viện. Để sử dụng đầy đủ chatbot (tra cứu cá nhân, mượn/trả, báo cáo theo quyền), vui lòng đăng nhập.",
+                "Hỏi về đăng nhập, quên mật khẩu...",
+                new List<string> { "Hướng dẫn đăng nhập tài khoản", "Tôi quên mật khẩu thì làm sao?", "LibraryHub có những dịch vụ gì?" }),
+            "register" => ("guest-register", "Đăng ký", "Trợ lý hỗ trợ đăng ký",
+                "Xin chào! Tôi là trợ lý LibraryHub. Bạn đang ở trang đăng ký. Tôi có thể hướng dẫn tạo tài khoản và các điều kiện sử dụng. Sau khi đăng ký/đăng nhập, bạn có thể dùng chatbot để tra cứu sách và hỗ trợ mượn trả theo vai trò.",
+                "Hỏi về đăng ký tài khoản...",
+                new List<string> { "Hướng dẫn đăng ký tài khoản bạn đọc", "Cần thông tin gì để đăng ký?", "Quy định sử dụng thư viện" }),
+            "books" => ("guest-books", "Danh mục sách", "Trợ lý tra cứu sách (khách)",
+                "Xin chào! Bạn đang xem danh mục sách. Tôi có thể gợi ý cách tìm sách theo tên/tác giả/thể loại trên trang. Để tra cứu tình trạng mượn cá nhân, gia hạn hoặc nhận hỗ trợ chuyên sâu, vui lòng đăng nhập.",
+                "Tìm sách theo tên, tác giả, thể loại...",
+                new List<string> { "Cách tìm sách trên LibraryHub", "Gợi ý thể loại sách phổ biến", "Tôi cần đăng nhập để làm gì?" }),
+            "post" => ("guest-posts", "Tin tức & bài viết", "Trợ lý nội dung thư viện",
+                "Xin chào! Bạn đang xem tin tức/bài viết của thư viện. Tôi có thể giúp bạn định hướng nội dung hoặc giới thiệu dịch vụ. Đăng nhập để sử dụng đầy đủ trợ lý theo vai trò của bạn.",
+                "Hỏi về tin tức, dịch vụ thư viện...",
+                new List<string> { "Tin tức/dịch vụ nổi bật của thư viện", "Hướng dẫn mượn sách", "Cách đăng nhập/đăng ký" }),
+            "contact" => ("guest-contact", "Liên hệ", "Trợ lý hỗ trợ liên hệ",
+                "Xin chào! Tôi có thể hướng dẫn thông tin liên hệ và kênh hỗ trợ của thư viện. Đăng nhập để được hỗ trợ nghiệp vụ cá nhân hóa.",
+                "Hỏi về liên hệ, hỗ trợ...",
+                new List<string> { "Thông tin liên hệ thư viện", "Giờ làm việc và hỗ trợ", "Hướng dẫn đăng nhập" }),
+            "introduction" => ("guest-introduction", "Giới thiệu", "Trợ lý giới thiệu thư viện",
+                "Xin chào! Tôi có thể giới thiệu về LibraryHub, dịch vụ và quy định cơ bản. Đăng nhập để sử dụng chatbot tra cứu và hỗ trợ theo tài khoản.",
+                "Hỏi về LibraryHub và dịch vụ...",
+                new List<string> { "LibraryHub cung cấp những dịch vụ gì?", "Quy định mượn trả cơ bản", "Làm sao để trở thành bạn đọc?" }),
+            _ => ("guest-home", "LibraryHub", "Trợ lý thư viện LibraryHub",
+                "Xin chào! Tôi là trợ lý LibraryHub. Tôi có thể giới thiệu thư viện, hướng dẫn tìm sách và cách sử dụng dịch vụ. Vui lòng đăng nhập để sử dụng đầy đủ các chức năng tra cứu và hỗ trợ theo vai trò (Bạn đọc/Thủ thư/Quản trị).",
+                "Hỏi về sách, dịch vụ, đăng nhập...",
+                new List<string> { "Hướng dẫn tìm sách trên LibraryHub", "Cách đăng ký/đăng nhập", "Quy định mượn trả sách" })
+        };
+        // Tinh chỉnh theo tên trang thực tế nếu cần
+        if (c == "home") { pageKey = "guest-home"; pageName = "Trang chủ"; }
+    }
+    else if (isAdminHome)
+    {
+        isMultipurpose = true;
+        pageKey = "admin-home";
+        pageName = "Trang chủ quản trị";
+        subtitle = "Chatbot đa năng cho quản trị hệ thống";
+        greeting = "Xin chào Quản trị viên! Tôi là trợ lý đa năng của LibraryHub. Tôi có thể hỗ trợ bạn tra cứu và tổng hợp dữ liệu (sách, bạn đọc, mượn/trả, thống kê, doanh thu/phạt, bài viết), hướng dẫn nghiệp vụ quản trị, xuất báo cáo (Excel/Word/PDF) và hỗ trợ các yêu cầu nhạy cảm theo quy trình phê duyệt (HITL) — không tự ý thay đổi dữ liệu/hệ thống.";
+        placeholder = "Hỏi bất kỳ điều gì về quản trị thư viện...";
+        suggestions = new List<string>
+        {
+            "Thống kê tổng quan thư viện hiện tại",
+            "Cho tôi biết các phiếu mượn quá hạn cần xử lý",
+            "Thống kê doanh thu phạt và lượt mượn theo tháng (nêu năm/tháng)",
+            "Tóm tắt tình trạng sách, thể loại và bạn đọc",
+            "Xuất báo cáo tổng quan ra Excel"
+        };
+    }
+    else if (inAdminArea)
+    {
+        var c = controller.ToLowerInvariant();
+        (pageKey, pageName, subtitle, greeting, placeholder, suggestions) = c switch
+        {
+            "book" => ("admin-books", "Quản lý sách", "Trợ lý chuyên trang quản lý sách",
+                "Xin chào! Tôi hỗ trợ chuyên sâu về quản lý sách: tra cứu đầu sách/bản sách, tình trạng, thể loại, tác giả/NXB, tồn kho và gợi ý thao tác quản trị (yêu cầu nhạy cảm sẽ qua phê duyệt).",
+                "Hỏi về sách, tồn kho, thể loại, tác giả...",
+                new List<string> { "Tổng số đầu sách và số bản sách hiện có", "Sách nào sắp hết hoặc đang được mượn nhiều?", "Hướng dẫn thêm/cập nhật thông tin sách an toàn" }),
+            "borrowing" or "borrowingdetail" => ("admin-borrowing", "Quản lý mượn", "Trợ lý chuyên trang mượn sách",
+                "Xin chào! Tôi hỗ trợ tra cứu phiếu mượn, chi tiết mượn, tình trạng đang mượn/quá hạn và thống kê lượt mượn theo thời gian.",
+                "Hỏi về phiếu mượn, quá hạn, lượt mượn...",
+                new List<string> { "Liệt kê phiếu mượn đang quá hạn", "Thống kê lượt mượn theo tháng (nêu năm)", "Tìm phiếu mượn theo độc giả/mã" }),
+            "return" or "returndetail" => ("admin-return", "Quản lý trả", "Trợ lý chuyên trang trả sách/phạt",
+                "Xin chào! Tôi hỗ trợ tra cứu phiếu trả, tiền phạt, doanh thu phạt và các vấn đề liên quan đến trả sách.",
+                "Hỏi về phiếu trả, tiền phạt, doanh thu...",
+                new List<string> { "Thống kê doanh thu phạt theo tháng/năm", "Các phiếu trả có phát sinh phạt gần đây", "Hướng dẫn xử lý trả sách và phạt" }),
+            "patron" => ("admin-patrons", "Quản lý bạn đọc", "Trợ lý chuyên trang bạn đọc",
+                "Xin chào! Tôi hỗ trợ tra cứu thông tin bạn đọc, tình trạng tài khoản, lịch sử mượn/trả và các vấn đề liên quan (thay đổi nhạy cảm cần phê duyệt).",
+                "Hỏi về bạn đọc, tài khoản, lịch sử mượn...",
+                new List<string> { "Tổng số bạn đọc đang hoạt động", "Tìm bạn đọc theo mã/tên (nêu thông tin)", "Độc giả nào có phiếu quá hạn?" }),
+            "librarian" => ("admin-librarians", "Quản lý thủ thư", "Trợ lý chuyên trang thủ thư",
+                "Xin chào! Tôi hỗ trợ tra cứu thông tin thủ thư và phân công/hoạt động liên quan trong phạm vi dữ liệu cho phép.",
+                "Hỏi về thủ thư, phân công, hoạt động...",
+                new List<string> { "Danh sách/tổng quan thủ thư", "Hướng dẫn quản lý tài khoản thủ thư (quy trình an toàn)" }),
+            "user" or "roles" or "userrole" => ("admin-users", "Quản lý người dùng & phân quyền", "Trợ lý chuyên trang người dùng/phân quyền",
+                "Xin chào! Tôi hỗ trợ tra cứu người dùng, vai trò và hướng dẫn phân quyền. Mọi thay đổi nhạy cảm (cấp/thu quyền, khóa tài khoản, đổi cấu hình) phải qua phê duyệt HITL và không tự động thực thi.",
+                "Hỏi về người dùng, vai trò, phân quyền...",
+                new List<string> { "Tổng quan người dùng và vai trò trong hệ thống", "Quy trình cấp/thu quyền an toàn", "Kiểm tra vai trò của người dùng (nêu mã/email nếu được phép)" }),
+            "statistics" => ("admin-statistics", "Thống kê & báo cáo", "Trợ lý chuyên trang thống kê",
+                "Xin chào! Tôi hỗ trợ phân tích thống kê, doanh thu, lượt mượn/phạt và xuất báo cáo. Vui lòng cung cấp mốc thời gian (năm/tháng/khoảng) để có số liệu chính xác.",
+                "Hỏi về thống kê, doanh thu, báo cáo...",
+                new List<string> { "Thống kê tổng quan thư viện", "Doanh thu phạt theo năm/tháng (nêu mốc thời gian)", "Xuất báo cáo thống kê ra PDF/Excel/Word" }),
+            "post" => ("admin-posts", "Quản lý bài viết", "Trợ lý chuyên trang nội dung/bài viết",
+                "Xin chào! Tôi hỗ trợ tra cứu và quản lý nội dung bài viết/tin tức của thư viện.",
+                "Hỏi về bài viết, tin tức, nội dung...",
+                new List<string> { "Tổng quan bài viết/tin tức hiện có", "Gợi ý nội dung thông báo cho bạn đọc" }),
+            "category" => ("admin-categories", "Quản lý thể loại", "Trợ lý chuyên trang thể loại",
+                "Xin chào! Tôi hỗ trợ tra cứu thể loại sách và cơ cấu danh mục.",
+                "Hỏi về thể loại sách, danh mục...",
+                new List<string> { "Danh sách thể loại và số lượng sách", "Thể loại nào có nhiều sách nhất?" }),
+            "author" => ("admin-authors", "Quản lý tác giả", "Trợ lý chuyên trang tác giả",
+                "Xin chào! Tôi hỗ trợ tra cứu thông tin tác giả và liên kết với đầu sách.",
+                "Hỏi về tác giả, đầu sách...",
+                new List<string> { "Tra cứu tác giả và số đầu sách liên quan" }),
+            "publisher" => ("admin-publishers", "Quản lý nhà xuất bản", "Trợ lý chuyên trang NXB",
+                "Xin chào! Tôi hỗ trợ tra cứu nhà xuất bản và các đầu sách liên quan.",
+                "Hỏi về nhà xuất bản, đầu sách...",
+                new List<string> { "Tra cứu nhà xuất bản và đầu sách liên quan" }),
+            "libraryreview" => ("admin-reviews", "Quản lý đánh giá", "Trợ lý chuyên trang đánh giá",
+                "Xin chào! Tôi hỗ trợ tra cứu và theo dõi đánh giá/phản hồi của bạn đọc.",
+                "Hỏi về đánh giá, phản hồi bạn đọc...",
+                new List<string> { "Tổng quan đánh giá/phản hồi gần đây" }),
+            "menu" or "filemanager" => ($"admin-{c}", "Quản trị hệ thống", "Trợ lý chuyên trang quản trị",
+                "Xin chào! Tôi hỗ trợ tra cứu và hướng dẫn trong khu vực quản trị này. Thay đổi cấu hình/hệ thống nhạy cảm cần phê duyệt HITL.",
+                "Hỏi về cấu hình/quản trị khu vực này...",
+                new List<string> { "Hướng dẫn thao tác an toàn trong khu vực này" }),
+            _ => ($"admin-{c}", $"Quản trị - {controller}", "Trợ lý ngữ cảnh trang quản trị",
+                "Xin chào! Tôi hỗ trợ bạn trong trang quản trị hiện tại: tra cứu dữ liệu, hướng dẫn nghiệp vụ và xuất báo cáo khi cần. Yêu cầu nhạy cảm sẽ qua phê duyệt HITL.",
+                "Hỏi về dữ liệu hoặc thao tác trong trang này...",
+                new List<string> { "Tóm tắt thông tin liên quan đến trang này", "Thống kê nhanh trong phạm vi quản trị" })
+        };
+    }
+    else
+    {
+        var c = controller.ToLowerInvariant();
+        (pageKey, pageName, subtitle, greeting, placeholder, suggestions) = c switch
+        {
+            "home" => ("site-home", "Trang chủ", "Trợ lý thư viện trên trang chủ",
+                "Xin chào! Tôi là trợ lý LibraryHub. Tại trang chủ, tôi có thể giúp bạn tìm sách, xem tin tức/nổi bật, hướng dẫn mượn sách và giải đáp nhanh về thư viện.",
+                "Tìm sách, hỏi về thư viện, hướng dẫn mượn...",
+                new List<string> { "Gợi ý sách nổi bật hoặc mới", "Hướng dẫn cách mượn sách trên LibraryHub", "Tôi muốn tìm sách theo chủ đề/thể loại" }),
+            "books" => ("site-books", "Danh mục sách", "Trợ lý tra cứu sách",
+                "Xin chào! Tôi hỗ trợ tra cứu sách theo tên, tác giả, thể loại, tình trạng còn/mượn và gợi ý lựa chọn phù hợp.",
+                "Tìm sách theo tên, tác giả, thể loại...",
+                new List<string> { "Tìm sách theo tên hoặc từ khóa", "Sách thuộc thể loại ... còn không?", "Gợi ý sách theo chủ đề tôi quan tâm" }),
+            "borrowingcart" => ("site-borrowing-cart", "Giỏ mượn sách", "Trợ lý hỗ trợ mượn sách",
+                "Xin chào! Tôi hỗ trợ bạn trong quá trình chọn và đăng ký mượn sách: kiểm tra điều kiện, số lượng, quy định và các bước tiếp theo.",
+                "Hỏi về giỏ mượn, điều kiện và quy trình mượn...",
+                new List<string> { "Quy trình mượn sách như thế nào?", "Tôi cần lưu ý gì khi đăng ký mượn?", "Kiểm tra tình trạng mượn/quá hạn của tôi" }),
+            "profile" => ("site-profile", "Hồ sơ cá nhân", "Trợ lý hồ sơ & lịch sử mượn",
+                "Xin chào! Tôi hỗ trợ bạn xem và hiểu thông tin hồ sơ, lịch sử mượn/trả, phiếu đang mượn và nhắc việc quá hạn (trong phạm vi tài khoản của bạn).",
+                "Hỏi về hồ sơ, lịch sử mượn/trả, quá hạn...",
+                new List<string> { "Tôi đang mượn những sách nào?", "Tôi có phiếu nào sắp/quá hạn không?", "Tóm tắt lịch sử mượn trả của tôi" }),
+            "post" => ("site-posts", "Tin tức & bài viết", "Trợ lý nội dung thư viện",
+                "Xin chào! Tôi hỗ trợ bạn tìm và tóm tắt tin tức/bài viết, thông báo của thư viện.",
+                "Hỏi về tin tức, bài viết, thông báo...",
+                new List<string> { "Tin tức/bài viết mới của thư viện", "Tóm tắt nội dung bài viết tôi quan tâm" }),
+            "contact" => ("site-contact", "Liên hệ", "Trợ lý hỗ trợ liên hệ",
+                "Xin chào! Tôi có thể hướng dẫn bạn cách liên hệ, giờ làm việc và các kênh hỗ trợ của thư viện.",
+                "Hỏi về liên hệ, hỗ trợ, giờ làm việc...",
+                new List<string> { "Thông tin liên hệ và hỗ trợ của thư viện", "Tôi cần hỗ trợ về mượn/trả sách" }),
+            "introduction" => ("site-introduction", "Giới thiệu", "Trợ lý giới thiệu thư viện",
+                "Xin chào! Tôi có thể giới thiệu về LibraryHub, dịch vụ và quy định cơ bản của thư viện.",
+                "Hỏi về LibraryHub và dịch vụ...",
+                new List<string> { "LibraryHub cung cấp những dịch vụ gì?", "Quy định mượn trả cơ bản" }),
+            "libraryreview" => ("site-reviews", "Đánh giá thư viện", "Trợ lý phản hồi bạn đọc",
+                "Xin chào! Tôi hỗ trợ bạn xem thông tin đánh giá và gửi phản hồi phù hợp về thư viện.",
+                "Hỏi về đánh giá, phản hồi...",
+                new List<string> { "Làm sao để gửi đánh giá/phản hồi?", "Xem tổng quan đánh giá thư viện" }),
+            _ => ($"site-{c}", string.IsNullOrEmpty(controller) ? "LibraryHub" : controller, "Trợ lý ngữ cảnh trang",
+                "Xin chào! Tôi là trợ lý LibraryHub. Tôi sẽ hỗ trợ dựa trên ngữ cảnh trang bạn đang sử dụng và vai trò của bạn.",
+                "Nhập câu hỏi của bạn...",
+                new List<string> { "Bạn có thể giúp gì trên trang này?", "Tìm sách hoặc thông tin tôi cần" })
+        };
+    }
+
+    var pageContext = inAdminArea
+        ? $"Admin/{controller}/{action} ({pageName})"
+        : $"{controller}/{action} ({pageName})";
+    var suggestionsJson = JsonSerializer.Serialize(suggestions);
+}
+
+<div id="libraryChat"
+     data-chat-role="@chatRole"
+     data-chat-area="@area"
+     data-chat-controller="@controller"
+     data-chat-action="@action"
+     data-chat-page-key="@pageKey"
+     data-chat-page-name="@pageName"
+     data-chat-page-context="@pageContext"
+     data-chat-multipurpose="@(isMultipurpose ? "true" : "false")"
+     data-chat-requires-auth="@(isGuest ? "true" : "false")"
+     data-chat-suggestions='@Html.Raw(suggestionsJson.Replace("'", "&#39;"))'>
+    <button type="button" id="chatToggle" class="chat-toggle" aria-label="Mở trợ lý LibraryHub" title="Mở trợ lý LibraryHub">
+        <i class="bi bi-chat-dots-fill" aria-hidden="true"></i>
+        <span class="chat-toggle-ping" aria-hidden="true"></span>
+    </button>
+
+    <div id="chatPanel" class="chat-panel" hidden>
+        <div class="chat-header">
+            <div class="chat-header-text">
+                <strong>@(isMultipurpose ? "LibraryHub Admin Assistant" : "LibraryHub Assistant")</strong>
+                <small>@subtitle</small>
+            </div>
+
+            <button type="button" id="chatClose" aria-label="Đóng ChatBot" title="Đóng">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div id="chatSuggestions" class="chat-suggestions" aria-label="Gợi ý nhanh"></div>
+
+        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+
+        <div class="chat-input-area">
+            <form id="chatTokenForm">
+                @Html.AntiForgeryToken()
+            </form>
+
+            <textarea id="chatInput" rows="1" maxlength="2000" placeholder="@placeholder"></textarea>
+
+            <button type="button" id="chatSend" aria-label="Gửi câu hỏi">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+
+    <script type="application/json" id="chatBootstrapConfig">@Html.Raw(JsonSerializer.Serialize(new {
+        role = chatRole,
+        area,
+        controller,
+        action,
+        pageKey,
+        pageName,
+        pageContext,
+        isMultipurpose,
+        requiresAuth = isGuest,
+        greeting,
+        placeholder,
+        suggestions
+    }))</script>
+</div>

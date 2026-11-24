@@ -1,0 +1,42 @@
+@model LibraryHub.Models.tblUsersRoles
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Thêm mới vai trò người dùng</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="Post" asp-action="Create">
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-3">
+                    <label asp-for="UserID">Tên người dùng</label>
+                    @* Thay input thành select *@
+                    <select asp-for="UserID" class="form-control" asp-items="ViewBag.listUser">
+                        <option value="">-- Chọn người dùng --</option>
+                    </select>
+                    <span asp-validation-for="UserID" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12 mb-3">
+                    <label asp-for="RoleID">Vai trò</label>
+                    @* Thay input thành select *@
+                    <select asp-for="RoleID" class="form-control" asp-items="ViewBag.listRole">
+                        <option value="">-- Chọn vai trò --</option>
+                    </select>
+                    <span asp-validation-for="RoleID" class="text-danger"></span>
+                </div>
+            </div>
+
+            <a asp-controller="UserRole" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i> Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>

@@ -1,0 +1,73 @@
+@using System.Collections.Generic
+@using LibraryHub.Models;
+@using System.Security.Claims
+@model List<tblUsersRoles>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@{
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Danh sách vai trò người dùng</h2>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body mt-4">
+                        <table class="table table-hover table-bordered datatable" style="background-color: white;">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="col-1 text-center">STT</th>
+                                    <th class="col-2 text-center">Tên người dùng</th>
+                                    <th class="col-1 text-center">Tên vai trò</th>
+                                    <th class="col-1 text-center">Chức năng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int stt = 0;
+                                }
+                                @foreach (var item in Model)
+                                {
+                                    stt++;
+                                    <tr>
+                                        <td class="text-center" scope="row">@stt</td>
+                                        <td class="text-center" scope="row">@item.User?.UserName</td>
+                                        <td class="text-center" scope="row">@item.Role?.RoleName</td>
+                                        <td class="text-center" scope="row">
+
+                                            <a asp-area="Admin" asp-action="Edit" asp-route-userID="@item.UserID"
+                                               asp-route-roleID="@item.RoleID"
+                                               class="btn btn-primary btn-sm @(currentUserId == item.UserID.ToString() ? "disabled" : "")"
+                                               style="@(currentUserId == item.UserID.ToString() ? "pointer-events:none;opacity:0.5;" : "")"
+                                               title="Chỉnh sửa vai trò người dùng">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <a asp-area="Admin" asp-action="Delete" asp-route-userID="@item.UserID"
+                                               asp-route-roleID="@item.RoleID"
+                                               class="btn btn-danger btn-sm @(currentUserId == item.UserID.ToString() ? "disabled" : "")"
+                                               style="@(currentUserId == item.UserID.ToString() ? "pointer-events:none;opacity:0.5;" : "")"
+                                               onclick="return confirm('Bạn có chắc chắn muốn xóa vai trò người dùng này không?');"
+                                               title="Xóa vai trò người dùng">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

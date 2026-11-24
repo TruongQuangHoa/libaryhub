@@ -1,0 +1,270 @@
+@model LibraryHub.Models.tblBook
+Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Sửa sách</h2>
+    </div>
+    <div class="container shadow p-5">
+        <form method="post" asp-action="Edit" enctype="multipart/form-data">
+            <div class="form-row row">
+                <input type="text" class="form-contro" asp-for="BookID" type="hidden">
+                <div class="form-group col-md-6 mb-3">
+
+                    <label class="control-label">
+                        Ảnh sách
+                    </label>
+
+                    <!-- Ảnh hiện tại / ảnh preview -->
+                    <div class="mb-3">
+
+                        <img id="imagePreview" src="@Model.ImageBook" alt="Ảnh @Model.TitleBook" style="
+                        width:150px;
+                        height:200px;
+                        object-fit:cover;
+                        border-radius:8px;
+                        border:1px solid #ddd;
+                        display:@(string.IsNullOrEmpty(Model.ImageBook) ? "none" : "block");
+                        " />
+
+                        <span id="noImageText" class="text-muted" style="
+                            display:@(string.IsNullOrEmpty(Model.ImageBook) ? "block" : "none");
+                            ">
+                            Chưa có ảnh
+                        </span>
+
+                    </div>
+
+                    <!-- Chọn ảnh mới -->
+                    <input type="file" id="imageFile" name="imageFile" class="form-control"
+                           accept=".jpg,.jpeg,.png,.gif,.webp,image/*" />
+
+                    <small class="text-muted">
+                        Nếu không chọn ảnh mới, hệ thống sẽ giữ nguyên ảnh hiện tại.
+                    </small>
+
+                    <span asp-validation-for="ImageBook" class="text-danger">
+                    </span>
+
+                </div>
+                <div class="form-group col-md-6 mb-3">
+                    <label>Tiêu đề sách</label>
+                    <input type="text" class="form-control" asp-for="TitleBook" placeholder="Tiêu đề sách..." required>
+                    <span asp-validation-for="TitleBook" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="PublisherID">
+                        Nhà xuất bản <span class="text-danger">*</span>
+                    </label>
+
+                    <select asp-for="PublisherID" asp-items="ViewBag.PublisherList" class="form-control"
+                            id="PublisherID">
+                        <option value="">--- Chọn nhà xuất bản ---</option>
+                    </select>
+
+                    <span asp-validation-for="PublisherID" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="PublicationYear">
+                        Năm xuất bản
+                    </label>
+
+                    <input asp-for="PublicationYear" type="number" class="form-control"
+                           placeholder="Nhập năm xuất bản..." min="1" />
+
+                    <span asp-validation-for="PublicationYear" class="text-danger">
+                    </span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label asp-for="AuthorID">
+                        Tác giả <span class="text-danger">*</span>
+                    </label>
+
+                    <select asp-for="AuthorID" asp-items="ViewBag.AuthorList" class="form-control" id="AuthorID">
+                        <option value="">--- Chọn tác giả ---</option>
+                    </select>
+
+                    <span asp-validation-for="AuthorID" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Số lượng</label>
+                    <input type="number" min="0" class="form-control" asp-for="BookQuantity"
+                           placeholder="Số lượng sách...">
+                    <span asp-validation-for="BookQuantity" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Mô tả</label>
+                    <input type="text" class="form-control" asp-for="Description" placeholder="Mô tả...">
+                    <span asp-validation-for="Description" class="alert-danger"></span>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>Thể loại</label>
+                    <select asp-for="CategoryID" class="form-control" asp-items="ViewBag.dpList" required>
+                        <option value="">--- Chọn thể loại ---</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label>
+                        @Html.CheckBox("IsActive", Model.IsActive)
+                        Hiển thị
+                    </label>
+                </div>
+            </div>
+            <a asp-controller="Book" asp-action="Index" class="btn btn-lg btn-warning p-2">
+                <i class="bi bi-arrow-left-circle"></i>
+                Quay lại
+            </a>
+
+            <button type="submit" class="btn btn-lg btn-primary p-2">
+                <i class="bi bi-file-plus-fill"></i> Lưu thông tin
+            </button>
+        </form>
+    </div>
+</main>
+
+@{
+    var summerNote = new LibraryHub.Areas.Admin.Models.SummerNote("#Contents");
+    <partial name="_SummerNote" model="summerNote" />
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const imageFile = document.getElementById('imageFile');
+            const imagePreview = document.getElementById('imagePreview');
+            const noImageText = document.getElementById('noImageText');
+
+            if (!imageFile || !imagePreview || !noImageText) {
+                return;
+            }
+
+            imageFile.addEventListener('change', function () {
+
+                const file = this.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                // Kiểm tra định dạng
+                if (!file.type.startsWith('image/')) {
+
+                    alert('Vui lòng chọn một tệp hình ảnh hợp lệ.');
+
+                    this.value = '';
+
+                    return;
+                }
+
+                // Kiểm tra dung lượng
+                if (file.size > 5 * 1024 * 1024) {
+
+                    alert('Dung lượng ảnh không được vượt quá 5MB.');
+
+                    this.value = '';
+
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+
+                    imagePreview.src = e.target.result;
+
+                    imagePreview.style.display = 'block';
+
+                    noImageText.style.display = 'none';
+
+                };
+
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const publisherSelect = document.getElementById('PublisherID');
+            const authorSelect = document.getElementById('AuthorID');
+
+            if (!publisherSelect || !authorSelect) {
+                return;
+            }
+
+            const authorsUrl = '@Url.Action("GetAuthorsByPublisher", "Book", new { area = "Admin" })';
+
+            authorSelect.disabled = !publisherSelect.value;
+
+            publisherSelect.addEventListener('change', function () {
+
+                const publisherId = this.value;
+
+                authorSelect.innerHTML =
+                    '<option value="">--- Chọn tác giả ---</option>';
+
+                authorSelect.value = '';
+
+                if (!publisherId) {
+                    authorSelect.disabled = true;
+                    return;
+                }
+
+                authorSelect.disabled = true;
+
+                fetch(authorsUrl + '?publisherId=' + encodeURIComponent(publisherId))
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Không thể tải danh sách tác giả.');
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+
+                        if (data.length === 0) {
+                            authorSelect.innerHTML =
+                                '<option value="">--- Nhà xuất bản chưa có tác giả ---</option>';
+
+                            authorSelect.disabled = true;
+                            return;
+                        }
+
+                        data.forEach(author => {
+
+                            const option = document.createElement('option');
+
+                            option.value = author.id;
+                            option.textContent = author.name;
+
+                            authorSelect.appendChild(option);
+                        });
+
+                        authorSelect.disabled = false;
+                    })
+                    .catch(error => {
+
+                        console.error(error);
+
+                        authorSelect.innerHTML =
+                            '<option value="">--- Không thể tải danh sách tác giả ---</option>';
+
+                        authorSelect.disabled = true;
+
+                        alert('Không thể tải danh sách tác giả. Vui lòng thử lại.');
+                    });
+            });
+        });
+    </script>
+}

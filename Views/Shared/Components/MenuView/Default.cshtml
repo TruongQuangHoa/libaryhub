@@ -1,0 +1,392 @@
+@model IList<tblMenu>
+
+@using LibraryHub.Utilities
+@using System.Text.Json
+@using LibraryHub.Models
+
+@{
+    /*
+     * =========================================================
+     * THÔNG TIN USER
+     * =========================================================
+     */
+
+    var loggedInUser = Context.User;
+
+    var isAuthenticated =
+        loggedInUser?.Identity?.IsAuthenticated ?? false;
+
+    var userName =
+        isAuthenticated
+            ? loggedInUser.Identity?.Name
+            : string.Empty;
+
+    var isAdmin =
+        isAuthenticated &&
+        loggedInUser.IsInRole("Admin");
+
+    var isPatron =
+        isAuthenticated &&
+        loggedInUser.IsInRole("Patron");
+
+    var email =
+        isAuthenticated
+            ? loggedInUser.Claims
+                .FirstOrDefault(c =>
+                    c.Type == System.Security.Claims.ClaimTypes.Email)
+                ?.Value
+            : string.Empty;
+}
+
+<!-- =============================================================
+     HEADER
+     ============================================================= -->
+
+<header id="header" class="header d-flex align-items-center sticky-top">
+
+    <div class="container-fluid container-xl position-relative d-flex align-items-center">
+
+
+        <!-- =====================================================
+             LOGO
+             ===================================================== -->
+
+        <a href="@Url.Action("Index", "Home")" class="logo d-flex align-items-center me-auto">
+            <img src="~/assets/img/logo-libaryhub.png" alt="LibraryHub">
+            <h1 class="sitename">LibraryHub</h1>
+        </a>
+
+
+        <!-- =====================================================
+             MENU
+             ===================================================== -->
+
+        <nav id="navmenu" class="navmenu">
+
+            <ul>
+
+                @foreach (
+                    var menu in Model
+                        .Where(m => m.Levels == 1)
+                        .OrderBy(m => m.MenuOrder)
+                )
+                {
+
+                    var subMenus =
+                        Model
+                            .Where(s =>
+                                s.ParentID == menu.MenuID)
+                            .OrderBy(s => s.MenuOrder)
+                            .ToList();
+
+
+                    @if (subMenus.Any())
+                    {
+                        <li class="has-submenu">
+                            <a href="javascript:void(0);">
+                                <i class="@menu.Icon"></i>
+                                <span>@menu.MenuName</span>
+                                <i class="fas fa-chevron-down submenu-arrow"></i>
+                            </a>
+
+                            <ul class="sense-submenu">
+                                @foreach (var sub in subMenus)
+                                {
+                                    <li>
+                                        <a href="@sub.Link">
+                                            <i class="fas fa-angle-right"></i>
+                                            <span>@sub.MenuName</span>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <a href="@Url.Action(
+                                                   menu.ActionName,
+                                                   menu.ControllerName
+                                               )">
+                                <i class="@menu.Icon"></i>
+                                @menu.MenuName
+                            </a>
+                        </li>
+                    }
+
+                }
+
+            </ul>
+
+
+            <!-- Mobile Menu -->
+
+            <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+
+        </nav>
+
+
+        <!-- =====================================================
+             USER AREA
+             ===================================================== -->
+
+
+        <!-- =====================================================
+             1. PATRON ĐÃ ĐĂNG NHẬP
+             ===================================================== -->
+
+        @if (isPatron)
+        {
+            <div id="patron-user-actions" class="patron-user-only ms-3 d-flex align-items-center">
+
+                <ul class="navbar-nav">
+
+                    <li class="nav-item dropdown pe-3">
+
+                        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+
+                            <span class="d-none d-md-block dropdown-toggle ps-2">
+
+                                @userName
+
+                            </span>
+
+                        </a>
+
+
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+
+
+                            <!-- Email -->
+
+                            <li class="dropdown-header">
+
+                                <span>
+
+                                    @(string.IsNullOrEmpty(email)
+                                        ? "Độc giả"
+                                        : email)
+
+                                </span>
+
+                            </li>
+
+
+                            <!-- Trang cá nhân -->
+
+                            <li>
+
+                                <a class="dropdown-item d-flex align-items-center" href="/Profile/Index">
+
+                                    <span>
+                                        Trang cá nhân
+                                    </span>
+
+                                </a>
+
+                            </li>
+
+
+                            <!-- Đăng xuất -->
+
+                            <li>
+
+                                <a class="dropdown-item d-flex align-items-center" href="/Login/Logout">
+
+                                    <span>
+                                        Đăng xuất
+                                    </span>
+
+                                </a>
+
+                            </li>
+
+                        </ul>
+
+                    </li>
+
+                </ul>
+
+            </div>
+        }
+
+
+        <!-- =====================================================
+             2. ADMIN
+             
+             Admin vẫn được render trên server.
+             JavaScript sẽ ẩn phần này khi tab là Patron Preview.
+             ===================================================== -->
+
+        @if (isAdmin)
+        {
+            <div id="admin-user-actions" class="admin-only ms-3 d-flex align-items-center">
+
+                <a href="@Url.Action(
+                                               "Index",
+                                               "Home",
+                                               new { area = "Admin" }
+                                           )" class="btn-getstarted text-warning me-2">
+
+                    <i class="fas fa-user-shield"></i>
+
+                    Trang Admin (@userName)
+
+                </a>
+
+
+                <a href="/Login/Logout" class="btn-getstarted bg-danger border-danger">
+
+                    <i class="fas fa-sign-out-alt"></i>
+
+                    Đăng xuất
+
+                </a>
+
+            </div>
+        }
+
+
+        <!-- =====================================================
+             3. ĐĂNG NHẬP / ĐĂNG KÝ
+             
+             Bình thường:
+             - Chưa đăng nhập → hiện
+
+             Khi Admin mở Patron Preview:
+             - Ban đầu server có thể render hidden
+             - JavaScript sẽ hiện lại
+             ===================================================== -->
+
+        
+        @if (!isAuthenticated)
+        {
+            <!-- Khách chưa đăng nhập -->
+            <div id="patron-guest-actions" class="patron-guest-only ms-3 d-flex align-items-center">
+
+                <a href="@Url.Action("Index", "Login")" class="btn-getstarted">
+                    <i class="fas fa-user"></i>
+                    Đăng nhập
+                </a>
+
+                <a href="@Url.Action("Index", "Register")" class="btn-getstarted">
+                    <i class="fas fa-user-plus"></i>
+                    Đăng ký
+                </a>
+            </div>
+        }
+        else if (isAdmin || User.IsInRole("Librarian"))
+        {
+            <!-- Admin hoặc Librarian đang xem giao diện Patron -->
+            <div id="patron-guest-actions" class="patron-guest-only ms-3 d-flex align-items-center" style="display: none;">
+
+                <a href="@Url.Action("Index", "Login")" class="btn-getstarted">
+                    <i class="fas fa-user"></i>
+                    Đăng nhập
+                </a>
+
+                <a href="@Url.Action("Index", "Register")" class="btn-getstarted">
+                    <i class="fas fa-user-plus"></i>
+                    Đăng ký
+                </a>
+            </div>
+        }
+
+    </div>
+
+</header>
+
+
+<!-- =============================================================
+     PATRON PREVIEW SCRIPT
+     ============================================================= -->
+
+<script>
+
+    (function () {
+
+        /*
+         * =====================================================
+         * KIỂM TRA PATRON PREVIEW
+         * =====================================================
+         */
+
+        const isPatronPreview =
+            sessionStorage.getItem("PatronPreview") === "true";
+
+        const context = document.getElementById("patron-page-context");
+        const isAdminOrLibrarian =
+            context?.dataset.isAdminOrLibrarian === "true";
+
+        if (!isPatronPreview && !isAdminOrLibrarian) {
+            return;
+        }
+
+
+        /*
+         * =====================================================
+         * NẾU KHÔNG PHẢI PREVIEW
+         * =====================================================
+         */
+
+        if (!isPatronPreview) {
+
+            return;
+
+        }
+
+
+        /*
+         * =====================================================
+         * ẨN ADMIN
+         * =====================================================
+         */
+
+        const adminActions =
+            document.getElementById("admin-user-actions");
+
+        if (adminActions) {
+
+            adminActions.style.display = "none";
+
+        }
+
+
+        /*
+         * =====================================================
+         * ẨN TÀI KHOẢN PATRON THẬT
+         *
+         * Trường hợp cần thiết nếu sau này Preview được mở
+         * trong một tài khoản Patron.
+         * =====================================================
+         */
+
+        const patronUserActions =
+            document.getElementById("patron-user-actions");
+
+        if (patronUserActions) {
+
+            patronUserActions.style.display = "none";
+
+        }
+
+
+        /*
+         * =====================================================
+         * HIỆN ĐĂNG NHẬP / ĐĂNG KÝ
+         * =====================================================
+         */
+
+        const guestActions =
+            document.getElementById("patron-guest-actions");
+
+        if (guestActions) {
+
+            guestActions.style.display = "flex";
+
+        }
+
+    })();
+
+</script>

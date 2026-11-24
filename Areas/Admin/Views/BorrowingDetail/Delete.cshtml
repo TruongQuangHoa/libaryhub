@@ -1,0 +1,59 @@
+@model LibraryHub.Models.tblBorrowingDetail
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Xác nhận xóa chi tiết phiếu mượn</h2>
+    </div>
+
+    <div class="container shadow p-5">
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="BorrowingDetailID" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="BorrowingDetailID">Mã chi tiết phiếu mượn</label>
+                        <input type="text" class="form-control" asp-for="BorrowingDetailID" disabled />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Mã phiếu mượn</label>
+                        <input type="text" class="form-control" value="@(Model.borrowing?.BorrowingID.ToString() ?? "N/A")" disabled />
+                    </div>
+                
+                    <div class="form-group mb-3">
+                        <label>Tên độc giả</label>
+                        <input type="text" class="form-control"
+                            value="@(Model.borrowing?.patron?.PatronName ?? "Không xác định")" disabled />
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label>Tên sách</label>
+                        <input type="text" class="form-control" value="@(Model.book?.TitleBook ?? "Không xác định")"
+                            disabled />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Thể loại sách</label>
+                        <input type="text" class="form-control" value="@(Model.book?.category?.CategoryName ?? "N/A")"
+                            disabled />
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="mt-4">
+                <a class="btn btn-lg btn-warning p-2 me-3" href="javascript:history.back()">
+                    <i class="bi bi-arrow-left-circle"></i> Quay lại
+                </a>
+                <button type="submit" class="btn btn-lg btn-danger p-2">
+                    <i class="bi bi-trash"></i> Xóa
+                </button>
+            </div>
+        </form>
+    </div>
+</main>

@@ -1,0 +1,207 @@
+
+@model LibraryHub.Models.tblPublisher
+
+@{
+    ViewData["Title"] = "Thêm nhà xuất bản";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h2>Thêm nhà xuất bản</h2>
+
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin" asp-controller="Home" asp-action="Index">
+                        Trang chủ
+                    </a>
+                </li>
+
+                <li class="breadcrumb-item">
+                    <a asp-area="Admin"
+                       asp-controller="Publisher"
+                       asp-action="Index">
+                        Nhà xuất bản
+                    </a>
+                </li>
+
+                <li class="breadcrumb-item active">
+                    Thêm mới
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+                            Thông tin nhà xuất bản
+                        </h5>
+
+                        <form asp-area="Admin"
+                              asp-controller="Publisher"
+                              asp-action="Create"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <div asp-validation-summary="ModelOnly"
+                                 class="text-danger mb-3">
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6 mb-3">
+                                    <label asp-for="PublisherName"
+                                           class="form-label">
+                                        Tên nhà xuất bản
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input asp-for="PublisherName"
+                                           class="form-control"
+                                           placeholder="Nhập tên nhà xuất bản..." />
+
+                                    <span asp-validation-for="PublisherName"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                                <div class="form-group col-md-6 mb-3">
+                                    <label asp-for="Phone"
+                                           class="form-label">
+                                        Số điện thoại
+                                    </label>
+
+                                    <input asp-for="Phone"
+                                           class="form-control"
+                                           placeholder="Nhập số điện thoại..." />
+
+                                    <span asp-validation-for="Phone"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                                <div class="form-group col-md-6 mb-3">
+                                    <label asp-for="Email"
+                                           class="form-label">
+                                        Email
+                                    </label>
+
+                                    <input asp-for="Email"
+                                           type="email"
+                                           class="form-control"
+                                           placeholder="Nhập địa chỉ email..." />
+
+                                    <span asp-validation-for="Email"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                                <div class="form-group col-md-6 mb-3">
+                                    <label asp-for="Website"
+                                           class="form-label">
+                                        Website
+                                    </label>
+
+                                    <input asp-for="Website"
+                                           class="form-control"
+                                           placeholder="https://example.com" />
+
+                                    <span asp-validation-for="Website"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                                <div class="form-group col-md-12 mb-3">
+                                    <label asp-for="Address"
+                                           class="form-label">
+                                        Địa chỉ
+                                    </label>
+
+                                    <input asp-for="Address"
+                                           class="form-control"
+                                           placeholder="Nhập địa chỉ nhà xuất bản..." />
+
+                                    <span asp-validation-for="Address"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                                <div class="form-group col-md-12 mb-3">
+                                    <label asp-for="Description"
+                                           class="form-label">
+                                        Mô tả
+                                    </label>
+
+                                    <textarea asp-for="Description"
+                                              class="form-control"
+                                              rows="4"
+                                              placeholder="Nhập mô tả về nhà xuất bản..."></textarea>
+
+                                    <span asp-validation-for="Description"
+                                          class="text-danger">
+                                    </span>
+                                </div>
+
+                                <div class="form-group col-md-12 mb-4">
+                                    <label class="form-label d-block">
+                                        Trạng thái hoạt động
+                                    </label>
+
+                                    <div class="form-check form-switch">
+                                        <input asp-for="IsActive"
+                                               class="form-check-input"
+                                               type="checkbox"
+                                               role="switch" />
+
+                                        <label asp-for="IsActive"
+                                               class="form-check-label">
+                                            Hoạt động
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex gap-2">
+
+                                <button type="submit"
+                                        class="btn btn-primary">
+                                    <i class="bi bi-save"></i>
+                                    Lưu thông tin
+                                </button>
+
+                                <a asp-area="Admin"
+                                   asp-controller="Publisher"
+                                   asp-action="Index"
+                                   class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i>
+                                    Quay lại
+                                </a>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

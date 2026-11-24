@@ -1,0 +1,43 @@
+@model LibraryHub.Models.tblBorrowing
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Xóa phiếu mượn</h2>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label asp-for="BorrowingID">Mã phiếu mượn</label>
+            <input type="text" class="form-control mb-3" asp-for="BorrowingID" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label>Tên độc giả</label>
+            <input type="text" class="form-control mb-3" value="@Model.patron?.PatronName" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label>Thủ thư tạo</label>
+            <input type="text" class="form-control mb-3" value="@Model.librarian?.FullName" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="BorrowDate">Ngày mượn</label>
+            <input type="date" class="form-control mb-3" asp-for="BorrowDate" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label asp-for="DueDate">Ngày trả</label>
+            <input type="date" class="form-control mb-3" asp-for="DueDate" disabled />
+        </div>
+
+    </div>
+    <!-- Begin Form -->
+    <form asp-action="Delete" method="Post">
+        <input type="hidden" asp-for="BorrowingID" />
+        <a class="btn btn-lg btn-warning p-2 mr-5" href="javascript:history.back()">
+            <i class="bi bi-arrow-left-circle"></i> Quay lại
+        </a>
+        <button type="submit" class="btn btn-lg btn-danger p-2">
+            <i class="bi bi-trash"></i> Xóa
+        </button>
+    </form>
+    <!-- End Form -->
+</main>

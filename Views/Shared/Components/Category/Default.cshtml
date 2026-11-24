@@ -1,0 +1,30 @@
+@using LibraryHub.Models;
+@model IList<tblCategory>
+<section id="course-categories" class="course-categories section">
+    <!-- Section Title -->
+    <div class="container section-title" data-aos="fade-up">
+        <h2>Danh mục thể loại sách</h2>
+        <p>Danh mục thể loại sách là danh sách các nhóm sách được phân loại theo nội dung để dễ tìm kiếm</p>
+    </div><!-- End Section Title -->
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row g-4">
+            @{
+                var categoryBooks = Model.Take(12).ToList();
+                foreach (var t in categoryBooks)
+                {
+                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
+                        <a href="/Books?categoryId=@t.CategoryID" class="category-card category-blue">
+                            <div class="category-icon">
+                                <i class="@t.Icon"></i>
+                            </div>
+                            <h5>@t.CategoryName</h5>
+                            <span class="course-count">@t.Description</span>
+                        </a>
+                    </div>
+                }
+            }
+            <!-- End Category Item -->
+        </div>
+    </div>
+</section>

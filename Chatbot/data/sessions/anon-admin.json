@@ -1,0 +1,26 @@
+{
+  "session_id": "anon-admin",
+  "updated_at_utc": "2026-11-24T03:04:01.297762+00:00",
+  "messages": [
+    {
+      "role": "user",
+      "content": "duyet"
+    },
+    {
+      "role": "assistant",
+      "content": "Không thể xác nhận thực thi tác vụ nhạy cảm: Không tìm thấy checkpoint tương ứng (có thể đã hết hạn hoặc sai mã).\nVui lòng kiểm tra lại checkpoint/approval token hoặc tạo yêu cầu mới."
+    },
+    {
+      "role": "user",
+      "content": "Xác nhận human-in-the-loop cho checkpoint đã tạo."
+    },
+    {
+      "role": "assistant",
+      "content": "Không thể xác nhận thực thi tác vụ nhạy cảm: Không tìm thấy checkpoint tương ứng (có thể đã hết hạn hoặc sai mã).\nVui lòng kiểm tra lại checkpoint/approval token hoặc tạo yêu cầu mới."
+    }
+  ],
+  "meta": {
+    "audit_id": "7f19795ab19e4199b882cd55706259c9",
+    "intent": "read_lookup"
+  }
+}

@@ -1,0 +1,145 @@
+@using LibraryHub.Models
+@model tblBorrowing
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h2>Chi tiết phiếu mượn #@Model.BorrowingID</h2>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body pt-4">
+                        <h5 class="card-title pt-0">Thông tin phiếu mượn</h5>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Mã phiếu mượn</label>
+                                <input type="text" class="form-control" value="@Model.BorrowingID" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Trạng thái phiếu</label>
+                                <div>
+                                    <span class="badge fs-6 @(Model.BorrowingStatusDisplay == "Quá hạn" ? "bg-danger" :
+                                        Model.BorrowingStatusDisplay == "Đã trả" ? "bg-success" : "bg-primary")">
+                                        @Model.BorrowingStatusDisplay
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Độc giả</label>
+                                <input type="text" class="form-control" value="@(Model.patron?.PatronName ?? "N/A")" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email độc giả</label>
+                                <input type="text" class="form-control" value="@(Model.patron?.Email ?? "-")" readonly />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Số điện thoại độc giả</label>
+                                <input type="text" class="form-control" value="@(Model.patron?.Phone ?? "-")" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Thủ thư tạo</label>
+                                <input type="text" class="form-control" value="@(Model.librarian?.FullName ?? "N/A")" readonly />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ngày mượn</label>
+                                <input type="text" class="form-control" value="@(Model.BorrowDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")" readonly />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Hạn trả</label>
+                                <input type="text" class="form-control" value="@(Model.DueDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")" readonly />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Tổng phí phiếu mượn</label>
+                                <input type="text" class="form-control fw-bold text-danger" value="@($"{Model.TotalBorrowingFee:N0} VNĐ")" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Ngày tạo</label>
+                                <input type="text" class="form-control" value="@(Model.CreateDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")" readonly />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Ngày cập nhật</label>
+                                <input type="text" class="form-control" value="@(Model.UpdateDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")" readonly />
+                            </div>
+                        </div>
+
+                        <h5 class="card-title">Chi tiết sách mượn</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 70px;">STT</th>
+                                        <th class="text-center" style="width: 110px;">Mã sách</th>
+                                        <th>Tên sách</th>
+                                        <th class="text-center" style="width: 160px;">Phí mượn</th>
+                                        <th class="text-center" style="width: 140px;">Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.borrowingDetail != null && Model.borrowingDetail.Any())
+                                    {
+                                        int stt = 0;
+                                        foreach (var detail in Model.borrowingDetail)
+                                        {
+                                            stt++;
+                                            <tr>
+                                                <td class="text-center">@stt</td>
+                                                <td class="text-center">@detail.BookID</td>
+                                                <td>@(detail.book?.TitleBook ?? "N/A")</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-warning text-dark">@detail.BorrowingFee.ToString("N0") VNĐ</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge @(detail.IsActive ? "bg-primary" : "bg-success")">
+                                                        @(detail.IsActive ? "Đang mượn" : "Đã trả")
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">Chưa có sách nào trong phiếu mượn này.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mt-3">
+                            <a asp-action="Index" class="btn btn-warning">
+                                <i class="bi bi-arrow-left-circle me-1"></i>Quay lại
+                            </a>
+
+                            <form asp-action="Export" method="get" class="d-flex flex-wrap align-items-end gap-2">
+                                <input type="hidden" name="id" value="@Model.BorrowingID" />
+                                <div>
+                                    <label class="form-label fw-bold mb-1">Định dạng xuất</label>
+                                    <select name="format" class="form-select" required>
+                                        <option value="pdf">PDF</option>
+                                        <option value="word">Word (.docx)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-download me-2"></i>Xuất phiếu mượn
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>

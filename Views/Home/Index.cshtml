@@ -1,0 +1,247 @@
+﻿<main class="main">
+
+    <!-- Courses Hero Section -->
+    <section id="courses-hero" class="courses-hero section light-background">
+
+        <div class="hero-content">
+            <div class="container">
+                <div class="row align-items-center">
+
+                    <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                        <div class="hero-text">
+                            <h1>Khám phá tri thức – Mở rộng tương lai cùng thư viện số hiện đại</h1>
+                            <p>
+                                Khám phá hàng ngàn đầu sách chất lượng thuộc nhiều lĩnh vực khác nhau. Đọc sách mọi lúc,
+                                mọi nơi, nâng cao kiến thức và phát triển bản thân dễ dàng chỉ với vài thao tác.
+                            </p>
+
+                            <div class="hero-stats">
+                                <div class="stat-item">
+                                    <span class="number purecounter" data-purecounter-start="0"
+                                          data-purecounter-end="@ViewBag.TotalBooksBorrowed"
+                                          data-purecounter-duration="2">
+                                        @ViewBag.TotalBooksBorrowed
+                                    </span>
+                                    <span class="label">Sách được mượn</span>
+                                </div>
+
+                                <div class="stat-item">
+                                    <span class="number purecounter" data-purecounter-start="0"
+                                          data-purecounter-end="@ViewBag.TotalCategories" data-purecounter-duration="2">
+                                        @ViewBag.TotalCategories
+                                    </span>
+                                    <span class="label">Thể loại</span>
+                                </div>
+
+                                <div class="stat-item">
+                                    <span class="number purecounter" data-purecounter-start="0"
+                                          data-purecounter-end="@ViewBag.TotalBookTitles" data-purecounter-duration="2">
+                                        @ViewBag.TotalBookTitles
+                                    </span>
+                                    <span class="label">Đầu sách</span>
+                                </div>
+                            </div>
+
+                            <div class="hero-buttons">
+                                <a asp-controller="Books" class="btn btn-primary">
+                                    Xem sách
+                                </a>
+                                <a asp-controller="Introduction" class="btn btn-outline">
+                                    Tìm hiểu thêm
+                                </a>
+                            </div>
+
+                            <div class="hero-features">
+                                <div class="feature">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span>Kho sách được chọn lọc</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="bi bi-clock"></i>
+                                    <span>Mượn sách dễ dàng</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="bi bi-people"></i>
+                                    <span>Hỗ trợ bạn đọc 24/7</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="hero-image">
+                            <div class="main-image">
+                                <img src="assets/img/slider_book.jpg" alt="Online Learning" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-background">
+            <div class="bg-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+        </div>
+
+    </section><!-- /Courses Hero Section -->
+
+    <!-- Featured Courses Section -->
+    @await Component.InvokeAsync("Book")
+    <!-- /Featured Courses Section -->
+
+    <!-- Course Categories Section -->
+    @await Component.InvokeAsync("Category")
+    <!-- /Course Categories Section -->
+
+    <!-- Featured Instructors Section -->
+    @await Component.InvokeAsync("Author")
+    <!-- /Featured Instructors Section -->
+
+    <!-- Testimonials Section -->
+    @await Component.InvokeAsync("LibraryReview")
+    <!-- /Testimonials Section -->
+
+    <!-- Recent Blog Posts Section -->
+    @await Component.InvokeAsync("Post")
+    <!-- /Recent Blog Posts Section -->
+
+
+    <!-- CTA Section -->
+    <section id="cta" class="cta section light-background">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row align-items-center">
+
+                <!-- Nội dung bên trái -->
+                <div class="col-lg-6" data-aos="fade-right" data-aos-delay="200">
+                    <div class="cta-content">
+
+                        <h2>Đánh thức đam mê đọc – Kiến tạo tương lai số</h2>
+
+                        <p>
+                            LibraryHub là không gian kết nối độc giả với
+                            kho tàng tri thức phong phú. Dễ dàng tìm kiếm
+                            sách, khám phá các danh mục tài liệu và tiếp cận
+                            nguồn kiến thức hữu ích mọi lúc, mọi nơi.
+                        </p>
+
+                        <div class="features-list">
+
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="300">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Khám phá kho sách đa dạng, phong phú</span>
+                            </div>
+
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="350">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Tra cứu sách nhanh chóng và thuận tiện</span>
+                            </div>
+
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="400">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Tiếp cận tri thức và tài liệu hữu ích</span>
+                            </div>
+
+                            <div class="feature-item" data-aos="fade-up" data-aos-delay="450">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span>Kết nối cộng đồng và lan tỏa văn hóa đọc</span>
+                            </div>
+
+                        </div>
+
+                        <div class="cta-actions" data-aos="fade-up" data-aos-delay="500">
+
+                            <a asp-controller="Books" class="btn btn-primary">
+                                Khám phá sách
+                            </a>
+
+                            <a asp-controller="Introduction" class="btn btn-outline">
+                                Tìm hiểu thêm
+                            </a>
+
+                        </div>
+
+
+                        <!-- Các giá trị nổi bật -->
+                        <div class="stats-row" data-aos="fade-up" data-aos-delay="400">
+
+                            <div class="stat-item">
+                                <h3>
+                                    <i class="bi bi-book-half"></i>
+                                </h3>
+                                <p>Kho sách phong phú</p>
+                            </div>
+
+                            <div class="stat-item">
+                                <h3>
+                                    <i class="bi bi-search"></i>
+                                </h3>
+                                <p>Tra cứu dễ dàng</p>
+                            </div>
+
+                            <div class="stat-item">
+                                <h3>
+                                    <i class="bi bi-lightbulb"></i>
+                                </h3>
+                                <p>Kết nối tri thức</p>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Hình ảnh bên phải -->
+                <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
+
+                    <div class="cta-image">
+
+                        <img src="~/uploads/libraryhub-thu-vien-hero.jpg" alt="Không gian thư viện hiện đại LibraryHub"
+                             class="img-fluid" asp-append-version="true" />
+
+                        <!-- Thẻ thông tin phía trên -->
+                        <div class="floating-element student-card" data-aos="zoom-in" data-aos-delay="600">
+
+                            <div class="card-content">
+                                <i class="bi bi-search"></i>
+
+                                <div class="text">
+                                    <span class="number">24/7</span>
+                                    <span class="label">Tra cứu mọi lúc</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Thẻ thông tin phía dưới -->
+                        <div class="floating-element course-card" data-aos="zoom-in" data-aos-delay="700">
+
+                            <div class="card-content">
+                                <i class="bi bi-book-half"></i>
+
+                                <div class="text">
+                                    <span class="number">LibraryHub</span>
+                                    <span class="label">Không gian tri thức</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+    <!-- /CTA Section -->
+
+</main>
